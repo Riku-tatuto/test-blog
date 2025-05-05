@@ -3,46 +3,99 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Test Blog</title>
+    <title>Test Blog - トップページ</title>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <div class="blog-container">
-        <h1>Test Blog</h1>
-        <div id="posts" class="posts-grid"></div>
-    </div>
+    <header class="site-header">
+        <div class="container">
+            <h1 class="logo">Test Blog</h1>
+        </div>
+    </header>
+
+    <main class="main-content">
+        <div class="container">
+            <h2 class="page-title">最新の記事</h2>
+            <div id="posts-container" class="posts-grid">
+                <!-- 記事一覧がここに表示されます -->
+            </div>
+            <div id="loading" class="loading-message">記事を読み込んでいます...</div>
+            <div id="error-message" class="error-message hidden"></div>
+        </div>
+    </main>
+
+    <footer class="site-footer">
+        <div class="container">
+            <p>&copy; 2023 Test Blog. All rights reserved.</p>
+        </div>
+    </footer>
 
     <script>
+        // 初期表示状態
+        document.getElementById('loading').textContent = '記事を読み込んでいます...';
+        
         // 記事一覧をGitHubから取得して表示
         fetch('https://raw.githubusercontent.com/riku-tatuto/test-blog/main/posts.json')
             .then(response => {
-                if (!response.ok) throw new Error('記事リストの取得に失敗しました');
+                if (!response.ok) {
+                    throw new Error('記事リストの取得に失敗しました');
+                }
                 return response.json();
             })
             .then(posts => {
-                const container = document.getElementById('posts');
-                if (!container) return;
+                const container = document.getElementById('posts-container');
+                const loading = document.getElementById('loading');
+                const errorMessage = document.getElementById('error-message');
                 
-                if (posts.length === 0) {
+                // ローディングメッセージを非表示
+                loading.classList.add('hidden');
+                
+                if (!posts || posts.length === 0) {
                     container.innerHTML = '<p>記事がありません</p>';
                     return;
                 }
 
-                posts.sort((a, b) => new Date(b.date) - new Date(a.date))
-                    .forEach(post => {
-                        const card = document.createElement('div');
-                        card.className = 'post-card';
-                        card.innerHTML = `
-                            <h2><a href="post.html?slug=${post.slug}">${post.title}</a></h2>
-                            <small>${new Date(post.date).toLocaleDateString('ja-JP')}</small>
-                        `;
-                        container.appendChild(card);
-                    });
+                // 投稿日時の新しい順にソート
+                posts.sort((a, b) => new Date(b.date) - new Date(a.date));
+                
+                // 各記事をカード形式で表示
+                posts.forEach(post => {
+                    const card = document.createElement('div');
+                    card.className = 'post-card';
+                    
+                    // カードの内容を構築
+                    card.innerHTML = `
+                        <h2 class="post-title">
+                            <a href="post.html?slug=${encodeURIComponent(post.slug)}">${post.title}</a>
+                        </h2>
+                        <div class="post-meta">
+                            <time datetime="${post.date}">${new Date(post.date).toLocaleDateString('ja-JP')}</time>
+                        </div>
+                        <div class="post-excerpt">
+                            記事を読む &rarr;
+                        </div>
+                    `;
+                    
+                    container.appendChild(card);
+                });
             })
             .catch(error => {
                 console.error('エラー:', error);
-                document.getElementById('posts').innerHTML = 
-                    '<p>記事の読み込み中にエラーが発生しました</p>';
+                const container = document.getElementById('posts-container');
+                const loading = document.getElementById('loading');
+                const errorMessage = document.getElementById('error-message');
+                
+                // 不要な要素を非表示
+                container.style.display = 'none';
+                loading.classList.add('hidden');
+                
+                // エラーメッセージを表示
+                errorMessage.classList.remove('hidden');
+                errorMessage.innerHTML = `
+                    <h3>エラーが発生しました</h3>
+                    <p>記事の読み込み中に問題が発生しました。</p>
+                    <button onclick="location.reload()" class="retry-button">再読み込み</button>
+                `;
             });
     </script>
 </body>
