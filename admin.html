@@ -35,16 +35,17 @@
             const title = document.getElementById('title').value;
             const content = document.getElementById('content').value;
             
-            const octokit = new Octokit({ accessToken: token });
+            const octokit = new window.Octokit({ auth: token });
             const owner = 'riku-tatuto';
             const repo = 'test-blog';
 
             try {
                 // 記事Markdownファイル作成
                 const markdownContent = `# ${title}\n\n${content}`;
-                await octokit.repos.createOrUpdateFileContents({
-                    owner, repo,
-                    path: `posts/${slug}.md`,
+                await octokit.request('PUT /repos/{owner}/{repo}/contents/posts/{path}', {
+                    owner,
+                    repo,
+                    path: `${slug}.md`,
                     message: `Add ${slug} post`,
                     content: btoa(unescape(encodeURIComponent(markdownContent)))
                 });
@@ -52,8 +53,8 @@
                 // posts.json更新
                 let posts = [];
                 try {
-                    const { data } = await octokit.repos.getContent({
-                        owner, repo, path: 'posts.json'
+                    const { data } = await octokit.request('GET /repos/{owner}/{repo}/contents/posts.json', {
+                        owner, repo
                     });
                     const response = await fetch(data.download_url);
                     posts = await response.json();
@@ -67,8 +68,9 @@
                     date: new Date().toISOString()
                 });
 
-                await octokit.repos.createOrUpdateFileContents({
-                    owner, repo,
+                await octokit.request('PUT /repos/{owner}/{repo}/contents/posts.json', {
+                    owner,
+                    repo,
                     path: 'posts.json',
                     message: 'Update posts.json',
                     content: btoa(unescape(encodeURIComponent(JSON.stringify(posts, null, 2))))
@@ -82,8 +84,9 @@
             }
         });
     </script>
+
     <script>
-        // Firebase設定（あなたのプロジェクトの情報をそのまま貼り付け）
+        // Firebase設定
         const firebaseConfig = {
             apiKey: "AIzaSyACaRzcxYiSnko-L0cemRaT_SYRHjOi8tY",
             authDomain: "online-chat-5daf8.firebaseapp.com",
