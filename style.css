@@ -208,19 +208,22 @@ textarea {
 }
 
 .comment {
-    background: #f8f9fa;
+    background: var(--card-background);
     padding: 1rem;
     border-radius: var(--border-radius);
     margin: 0.5rem 0;
     border: 1px solid #ddd;
-    transition: all 0.3s ease;
+    transition: all var(--transition-speed);
+}
+
+.comment p {
+    margin: 0 0 0.5rem 0;
 }
 
 .comment-footer {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-top: 0.5rem;
     font-size: 0.9rem;
     color: #666;
 }
@@ -371,8 +374,8 @@ textarea {
 
 /* モバイル用の最適化 */
 @media (max-width: 960px) {
-    .post-container-wide {
-        max-width: 95%;
+    .post-container-full {
+        max-width: 100%;
         padding: 1.5rem;
     }
     
@@ -388,5 +391,28 @@ textarea {
     .like-comment-btn {
         width: 100%;
         text-align: center;
+    }
+}
+
+.post-container-full {
+    width: 100%;
+    max-width: 100%;
+    margin: 2rem auto;
+    padding: 2rem;
+    background: var(--card-background);
+    border-radius: var(--border-radius);
+    box-shadow: var(--box-shadow);
+    /* モバイル用のパディング調整 */
+    padding-left: 1rem;
+    padding-right: 1rem;
+}
+
+/* レスポンシブな記事ページコンテナ */
+@media (min-width: 1200px) {
+    .post-container-full {
+        width: 90%;
+        max-width: 90%;
+        margin: 2rem auto;
+        padding: 2rem;
     }
 }
