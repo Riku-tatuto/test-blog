@@ -160,6 +160,27 @@ textarea {
     margin-left: 0.5rem;
 }
 
+.like-comment-btn {
+    background: var(--secondary-color);
+    color: white;
+    border: none;
+    border-radius: var(--border-radius);
+    padding: 0.2rem 0.5rem;
+    cursor: pointer;
+    font-size: 0.9rem;
+    transition: background 0.3s ease;
+}
+
+.comment-like-count {
+    font-weight: bold;
+    min-width: 20px;
+    text-align: center;
+}
+
+.like-comment-btn:hover {
+    background: #e53935;
+}
+
 .comments {
     margin-top: 1.5rem;
 }
@@ -191,7 +212,8 @@ textarea {
     padding: 1rem;
     border-radius: var(--border-radius);
     margin: 0.5rem 0;
-    border: 1px solid #eee;
+    border: 1px solid #ddd;
+    transition: all 0.3s ease;
 }
 
 .comment-footer {
@@ -200,12 +222,22 @@ textarea {
     align-items: center;
     margin-top: 0.5rem;
     font-size: 0.9rem;
-    color: #888;
+    color: #666;
 }
 
 .comment-likes {
     color: var(--secondary-color);
     font-weight: bold;
+}
+
+.comment:hover {
+    transform: translateY(-2px);
+}
+
+.comment-actions {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
 }
 
 /* メインページ */
@@ -340,10 +372,21 @@ textarea {
 /* モバイル用の最適化 */
 @media (max-width: 960px) {
     .post-container-wide {
-        max-width: 90%;
+        max-width: 95%;
+        padding: 1.5rem;
     }
     
     .post-header h1 {
         font-size: 1.75rem;
+    }
+    
+    .comment-actions {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+    
+    .like-comment-btn {
+        width: 100%;
+        text-align: center;
     }
 }
