@@ -7,7 +7,7 @@
     <link rel="stylesheet" href="style.css">
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
     
-    <!-- Firebase SDK（compatバージョンを使用） -->
+    <!-- Firebase SDK -->
     <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-database-compat.js"></script>
 </head>
@@ -16,9 +16,6 @@
     <nav class="navbar">
         <div class="container">
             <a href="index.html" class="navbar-brand">Test Blog</a>
-            <ul class="nav-links">
-                <li><a href="index.html">ホーム</a></li>
-            </ul>
         </div>
     </nav>
 
@@ -34,6 +31,7 @@
     <main class="post-main">
         <div class="post-container-full">
             <div id="post-header" class="post-header">
+                <div id="post-thumbnail" class="post-thumbnail"></div>
                 <h1 id="post-title">読み込み中...</h1>
                 <div id="post-meta" class="post-meta">
                     <span id="post-date">日付を読み込み中...</span>
@@ -80,9 +78,13 @@
             measurementId: "G-6B5T0TDER9"
         };
 
-        // Firebase初期化（compatバージョン）
-        firebase.initializeApp(firebaseConfig);
-        const database = firebase.database();
+        // Firebase初期化
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.10/firebase-app-compat.js";
+        import { getDatabase, ref, onValue, push, transaction } from "https://www.gstatic.com/firebasejs/9.6.10/firebase-database-compat.js";
+        
+        const app = initializeApp(firebaseConfig);
+        const database = getDatabase(app);
+        window.firebase = { app, database };
     </script>
 
     <script>
@@ -124,6 +126,14 @@
                 if (post) {
                     document.getElementById('post-date').textContent = 
                         `公開日: ${new Date(post.date).toLocaleDateString('ja-JP')}`;
+                    
+                    // サムネイルを表示
+                    if (post.thumbnail) {
+                        const postThumbnail = document.getElementById('post-thumbnail');
+                        postThumbnail.style.backgroundImage = `url('${post.thumbnail}')`;
+                        postThumbnail.style.backgroundSize = 'cover';
+                        postThumbnail.style.backgroundPosition = 'center';
+                    }
                 }
             })
             .catch(error => {
@@ -132,24 +142,24 @@
                     '<p>記事の読み込み中にエラーが発生しました</p>';
             });
 
-        // リアルタイムデータベース参照
-        const postRef = firebase.database().ref('posts/' + slug);
-        const likesRef = firebase.database().ref('posts/' + slug + '/likes');
-        const commentsRef = firebase.database().ref('posts/' + slug + '/comments');
+        // Firebase参照を設定
+        const postRef = ref(window.firebase.database, 'posts/' + slug);
+        const likesRef = ref(window.firebase.database, 'posts/' + slug + '/likes');
+        const commentsRef = ref(window.firebase.database, 'posts/' + slug + '/comments');
 
-        // いいね機能（リアルタイム更新）
-        likesRef.on('value', (snapshot) => {
+        // いいね機能
+        onValue(likesRef, (snapshot) => {
             const count = snapshot.val() || 0;
             document.getElementById('likeCount').textContent = count;
         });
 
         document.getElementById('likeBtn').addEventListener('click', () => {
-            likesRef.transaction((current) => {
+            transaction(likesRef, (current) => {
                 return (current || 0) + 1;
             });
         });
 
-        // コメント機能（リアルタイム更新）
+        // コメント機能
         document.getElementById('commentBtn').addEventListener('click', () => {
             const text = document.getElementById('commentInput').value;
             const author = document.getElementById('commentAuthor').value;
@@ -159,7 +169,7 @@
                 return;
             }
             
-            commentsRef.push({
+            push(commentsRef, {
                 text,
                 timestamp: Date.now(),
                 likes: 0,
@@ -171,7 +181,7 @@
         });
 
         // コメントをリアルタイムで取得して表示
-        commentsRef.on('value', (snapshot) => {
+        onValue(commentsRef, (snapshot) => {
             const commentList = document.getElementById('commentList');
             commentList.innerHTML = '';
             
@@ -198,42 +208,9 @@
                         <small class="comment-time">${new Date(comment.timestamp).toLocaleString('ja-JP')}</small>
                     </div>
                     <p>${comment.text}</p>
-                    <div class="comment-footer">
-                        <div class="comment-actions">
-                            <button class="like-comment-btn" data-id="${comment.id}">👍 いいね</button>
-                            <span class="comment-like-count">${comment.likes || 0}</span>
-                        </div>
-                    </div>
                 `;
                 commentList.appendChild(div);
             });
-        });
-
-        // コメントに対するいいね機能
-        document.getElementById('commentList').addEventListener('click', function(e) {
-            if (e.target.classList.contains('like-comment-btn')) {
-                const commentId = e.target.dataset.id;
-                const commentRef = firebase.database().ref('posts/' + slug + '/comments/' + commentId + '/likes');
-                
-                commentRef.transaction(current => {
-                    return (current || 0) + 1;
-                });
-            }
-        });
-
-        // コメントのいいね数をリアルタイムで更新
-        commentsRef.on('child_changed', (snapshot) => {
-            const comment = snapshot.val();
-            const commentId = snapshot.key;
-            
-            const commentElements = document.querySelectorAll(`[data-id="${commentId}"]`);
-            if (commentElements.length > 0) {
-                const commentElement = commentElements[0];
-                const likeCount = commentElement.querySelector('.comment-like-count');
-                if (likeCount) {
-                    likeCount.textContent = comment.likes || 0;
-                }
-            }
         });
     </script>
 </body>
