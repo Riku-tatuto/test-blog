@@ -7,12 +7,24 @@
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <header class="site-header">
+    <!-- 固定ナビゲーションバー -->
+    <nav class="navbar">
         <div class="container">
-            <h1 class="logo">Test Blog</h1>
+            <a href="index.html" class="navbar-brand">Test Blog</a>
+            <ul class="nav-links">
+                <li><a href="index.html">ホーム</a></li>
+            </ul>
         </div>
-    </header>
+    </nav>
 
+    <!-- パンくずリスト -->
+    <div class="container breadcrumb-container">
+        <div class="breadcrumb">
+            <a href="index.html">ホーム</a>
+        </div>
+    </div>
+
+    <!-- メインコンテンツ -->
     <main class="main-content">
         <div class="container">
             <h2 class="page-title">最新の記事</h2>
@@ -26,7 +38,7 @@
 
     <footer class="site-footer">
         <div class="container">
-            <p>&copy; 2023 Test Blog. All rights reserved.</p>
+            <p>&copy; 2025 Test Blog. All rights reserved.</p>
         </div>
     </footer>
 
@@ -56,28 +68,26 @@
                 }
 
                 // 投稿日時の新しい順にソート
-                posts.sort((a, b) => new Date(b.date) - new Date(a.date));
-                
-                // 各記事をカード形式で表示
-                posts.forEach(post => {
-                    const card = document.createElement('div');
-                    card.className = 'post-card';
-                    
-                    // カードの内容を構築
-                    card.innerHTML = `
-                        <h2 class="post-title">
-                            <a href="post.html?slug=${encodeURIComponent(post.slug)}">${post.title}</a>
-                        </h2>
-                        <div class="post-meta">
-                            <time datetime="${post.date}">${new Date(post.date).toLocaleDateString('ja-JP')}</time>
-                        </div>
-                        <div class="post-excerpt">
-                            記事を読む &rarr;
-                        </div>
-                    `;
-                    
-                    container.appendChild(card);
-                });
+                posts.sort((a, b) => new Date(b.date) - new Date(a.date))
+                    .forEach(post => {
+                        const card = document.createElement('div');
+                        card.className = 'post-card';
+                        
+                        // カードの内容を構築
+                        card.innerHTML = `
+                            <h2 class="post-title">
+                                <a href="post.html?slug=${encodeURIComponent(post.slug)}">${post.title}</a>
+                            </h2>
+                            <div class="post-meta">
+                                <time datetime="${post.date}">${new Date(post.date).toLocaleDateString('ja-JP')}</time>
+                            </div>
+                            <div class="post-excerpt">
+                                記事を読む &rarr;
+                            </div>
+                        `;
+                        
+                        container.appendChild(card);
+                    });
             })
             .catch(error => {
                 console.error('エラー:', error);
