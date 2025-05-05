@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Test Blog - トップページ</title>
+    <title>Test Blog</title>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
@@ -11,9 +11,6 @@
     <nav class="navbar">
         <div class="container">
             <a href="index.html" class="navbar-brand">Test Blog</a>
-            <ul class="nav-links">
-                <li><a href="index.html">ホーム</a></li>
-            </ul>
         </div>
     </nav>
 
@@ -28,9 +25,7 @@
     <main class="main-content">
         <div class="container">
             <h2 class="page-title">最新の記事</h2>
-            <div id="posts-container" class="posts-grid">
-                <!-- 記事一覧がここに表示されます -->
-            </div>
+            <div id="posts-container" class="posts-grid"></div>
             <div id="loading" class="loading-message">記事を読み込んでいます...</div>
             <div id="error-message" class="error-message hidden"></div>
         </div>
@@ -49,9 +44,7 @@
         // 記事一覧をGitHubから取得して表示
         fetch('https://raw.githubusercontent.com/riku-tatuto/test-blog/main/posts.json')
             .then(response => {
-                if (!response.ok) {
-                    throw new Error('記事リストの取得に失敗しました');
-                }
+                if (!response.ok) throw new Error('記事リストの取得に失敗しました');
                 return response.json();
             })
             .then(posts => {
@@ -62,7 +55,9 @@
                 // ローディングメッセージを非表示
                 loading.classList.add('hidden');
                 
-                if (!posts || posts.length === 0) {
+                if (!container) return;
+                
+                if (posts.length === 0) {
                     container.innerHTML = '<p>記事がありません</p>';
                     return;
                 }
@@ -73,18 +68,25 @@
                         const card = document.createElement('div');
                         card.className = 'post-card';
                         
+                        // サムネイル部分を構築
+                        const thumbnailHTML = post.thumbnail ? 
+                            `<div class="post-thumbnail" style="background-image: url('${post.thumbnail}')"></div>` : 
+                            `<div class="post-thumbnail default-thumbnail"></div>`;
+                        
                         // カードの内容を構築
                         card.innerHTML = `
-                            <h2 class="post-title">
-                                <a href="post.html?slug=${encodeURIComponent(post.slug)}">${post.title}</a>
-                            </h2>
-                            <div class="post-meta">
-                                <time datetime="${post.date}">${new Date(post.date).toLocaleDateString('ja-JP')}</time>
-                            </div>
-                            <div class="post-excerpt">
-                                記事を読む &rarr;
+                            ${thumbnailHTML}
+                            <div class="post-card-content">
+                                <h2 class="post-title">${post.title}</h2>
                             </div>
                         `;
+                        
+                        // クリックイベント追加
+                        card.addEventListener('click', () => {
+                            window.location.href = `post.html?slug=${post.slug}`;
+                        });
+                        
+                        card.style.cursor = 'pointer';
                         
                         container.appendChild(card);
                     });
