@@ -12,30 +12,58 @@
     <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-database-compat.js"></script>
 </head>
 <body>
-    <div class="post-container-full">
-        <div id="post-header" class="post-header">
-            <h1 id="post-title">読み込み中...</h1>
-            <div id="post-meta" class="post-meta">
-                <span id="post-date">日付を読み込み中...</span>
-            </div>
+    <!-- 固定ナビゲーションバー -->
+    <nav class="navbar">
+        <div class="container">
+            <a href="index.html" class="navbar-brand">Test Blog</a>
+            <ul class="nav-links">
+                <li><a href="index.html">ホーム</a></li>
+                <li><a href="admin.html">投稿</a></li>
+            </ul>
         </div>
-        
-        <div id="post-content" class="post-content">
-            <!-- 記事が表示される -->
-        </div>
-        
-        <div class="interaction">
-            <button id="likeBtn" class="like-button">👍 いいね</button>
-            <span id="likeCount" class="like-count">0</span>
-            
-            <div class="comments">
-                <h3>コメント</h3>
-                <textarea id="commentInput" placeholder="コメントを入力..."></textarea>
-                <button id="commentBtn" class="comment-button">送信</button>
-                <div id="commentList" class="comment-list"></div>
-            </div>
+    </nav>
+
+    <!-- パンくずリスト -->
+    <div class="container">
+        <div class="breadcrumb">
+            <a href="index.html">ホーム</a> > 
+            <span id="breadcrumb-title">記事読み込み中...</span>
         </div>
     </div>
+
+    <!-- 記事コンテナ -->
+    <main class="post-main">
+        <div class="post-container-full">
+            <div id="post-header" class="post-header">
+                <h1 id="post-title">読み込み中...</h1>
+                <div id="post-meta" class="post-meta">
+                    <span id="post-date">日付を読み込み中...</span>
+                </div>
+            </div>
+            
+            <div id="post-content" class="post-content">
+                <!-- 記事が表示される -->
+            </div>
+            
+            <div class="interaction">
+                <button id="likeBtn" class="like-button">👍 いいね</button>
+                <span id="likeCount" class="like-count">0</span>
+                
+                <div class="comments">
+                    <h3>コメント</h3>
+                    <textarea id="commentInput" placeholder="コメントを入力..."></textarea>
+                    <button id="commentBtn" class="comment-button">送信</button>
+                    <div id="commentList" class="comment-list"></div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <footer class="site-footer">
+        <div class="container">
+            <p>&copy; 2023 Test Blog. All rights reserved.</p>
+        </div>
+    </footer>
 
     <script>
         // Firebase初期化
@@ -82,6 +110,7 @@
                 if (firstLine.startsWith('# ')) {
                     const title = firstLine.substring(2).trim();
                     document.getElementById('post-title').textContent = title;
+                    document.getElementById('breadcrumb-title').textContent = title;
                 }
                 
                 // 日付を取得（posts.jsonから）
@@ -135,7 +164,7 @@
             document.getElementById('commentInput').value = '';
         });
 
-        // 新しいコメントをリアルタイムで反映
+        // コメントをリアルタイムで取得して表示
         commentsRef.on('value', (snapshot) => {
             const commentList = document.getElementById('commentList');
             commentList.innerHTML = '';
@@ -148,17 +177,22 @@
             const comments = snapshot.val();
             const commentListElements = [];
             
-            Object.keys(comments).forEach(commentId => {
-                const comment = comments[commentId];
+            // コメントを日時順にソート
+            const sortedComments = Object.entries(comments)
+                .map(([key, value]) => ({ id: key, ...value }))
+                .sort((a, b) => b.timestamp - a.timestamp);
+            
+            // コメント要素を作成
+            sortedComments.forEach(comment => {
                 const div = document.createElement('div');
                 div.className = 'comment';
-                div.setAttribute('data-id', commentId);
+                div.setAttribute('data-id', comment.id);
                 div.innerHTML = `
                     <p>${comment.text}</p>
                     <div class="comment-footer">
                         <small>${new Date(comment.timestamp).toLocaleString('ja-JP')}</small>
                         <div class="comment-actions">
-                            <button class="like-comment-btn" data-id="${commentId}">👍 いいね</button>
+                            <button class="like-comment-btn" data-id="${comment.id}">👍 いいね</button>
                             <span class="comment-like-count">${comment.likes || 0}</span>
                         </div>
                     </div>
@@ -179,7 +213,7 @@
             }
         });
 
-        // コメントの更新をリアルタイムで反映
+        // コメントのいいね数をリアルタイムで更新
         commentsRef.on('child_changed', (snapshot) => {
             const comment = snapshot.val();
             const commentId = snapshot.key;
