@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Test Blog</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+</head>
+<body>
+    <div class="post-container">
+        <div id="post-content"></div>
+        
+        <div class="interaction">
+            <button id="likeBtn">👍 いいね</button>
+            <span id="likeCount">0</span>
+            
+            <div class="comments">
+                <textarea id="commentInput" placeholder="コメントを入力..."></textarea>
+                <button id="commentBtn">送信</button>
+                <div id="commentList"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Firebase初期化コードは省略（上記を参照）
+
+        const urlParams = new URLSearchParams(window.location.search);
+        const slug = urlParams.get('slug');
+        const postRef = database.ref('posts/' + slug);
+        const likesRef = postRef.child('likes');
+        const commentsRef = postRef.child('comments');
+
+        // 記事コンテンツ読み込み
+        fetch(`https://raw.githubusercontent.com/riku-tatuto/test-blog/main/posts/${slug}.md`)
+            .then(response => response.text())
+            .then(text => {
+                document.getElementById('post-content').innerHTML = marked.parse(text);
+            });
+
+        // いいね機能
+        likesRef.on('value', snapshot => {
+            document.getElementById('likeCount').textContent = snapshot.val() || 0;
+        });
+
+        document.getElementById('likeBtn').addEventListener('click', () => {
+            likesRef.transaction(current => {
+                return (current || 0) + 1;
+            });
+        });
+
+        // コメント機能
+        document.getElementById('commentBtn').addEventListener('click', () => {
+            const text = document.getElementById('commentInput').value;
+            if (!text) return;
+            
+            commentsRef.push({
+                text,
+                timestamp: Date.now(),
+                likes: 0
+            });
+            
+            document.getElementById('commentInput').value = '';
+        });
+
+        commentsRef.on('child_added', snapshot => {
+            const comment = snapshot.val();
+            const div = document.createElement('div');
+            div.className = 'comment';
+            div.innerHTML = `
+                <p>${comment.text}</p>
+                <small>${new Date(comment.timestamp).toLocaleString()}</small>
+            `;
+            document.getElementById('commentList').appendChild(div);
+        });
+    </script>
+</body>
+</html>
