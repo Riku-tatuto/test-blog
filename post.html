@@ -54,6 +54,7 @@
                     <textarea id="commentInput" placeholder="コメントを入力..."></textarea>
                     <button id="commentBtn" class="comment-button">送信</button>
                     <div id="commentList" class="comment-list"></div>
+                    <div id="debugOutput" class="debug-output"></div>
                 </div>
             </div>
         </div>
@@ -84,25 +85,42 @@
     </script>
 
     <script>
+        // デバッグメッセージ表示用
+        function debugLog(message) {
+            const debugOutput = document.getElementById('debugOutput');
+            if (debugOutput) {
+                const logEntry = document.createElement('div');
+                logEntry.className = 'debug-entry';
+                logEntry.textContent = `[${new Date().toLocaleTimeString()}] ${message}`;
+                debugOutput.appendChild(logEntry);
+                debugOutput.scrollTop = debugOutput.scrollHeight;
+            }
+        }
+
         // URLパラメータからスラグを取得
         const urlParams = new URLSearchParams(window.location.search);
         const slug = urlParams.get('slug');
         
+        debugLog('ページ読み込み開始');
         if (!slug) {
+            debugLog('エラー: スラグが指定されていません');
             document.getElementById('post-content').innerHTML = 
                 '<p>有効な記事URLが指定されていません</p>';
             throw new Error('スラグが指定されていません');
         }
+        debugLog(`スラグ取得完了: ${slug}`);
 
         // 記事コンテンツをGitHubから取得して表示
         fetch(`https://raw.githubusercontent.com/riku-tatuto/test-blog/main/posts/${slug}.md`)
             .then(response => {
+                debugLog('GitHub記事取得完了');
                 if (!response.ok) {
                     throw new Error('記事の取得に失敗しました');
                 }
                 return response.text();
             })
             .then(text => {
+                debugLog('GitHub記事解析開始');
                 document.getElementById('post-content').innerHTML = marked.parse(text);
                 
                 // タイトルを抽出して表示
@@ -111,20 +129,27 @@
                     const title = firstLine.substring(2).trim();
                     document.getElementById('post-title').textContent = title;
                     document.getElementById('breadcrumb-title').textContent = title;
+                    debugLog(`タイトル取得完了: ${title}`);
                 }
                 
                 // 日付を取得（posts.jsonから）
                 return fetch('https://raw.githubusercontent.com/riku-tatuto/test-blog/main/posts.json');
             })
-            .then(response => response.json())
+            .then(response => {
+                debugLog('posts.json取得完了');
+                return response.json();
+            })
             .then(posts => {
+                debugLog('posts.json解析開始');
                 const post = posts.find(p => p.slug === slug);
                 if (post) {
                     document.getElementById('post-date').textContent = 
                         `公開日: ${new Date(post.date).toLocaleDateString('ja-JP')}`;
+                    debugLog(`記事日付表示完了: ${post.date}`);
                 }
             })
             .catch(error => {
+                debugLog(`エラー発生: ${error}`);
                 console.error('エラー:', error);
                 document.getElementById('post-content').innerHTML = 
                     '<p>記事の読み込み中にエラーが発生しました</p>';
@@ -139,9 +164,11 @@
         likesRef.on('value', (snapshot) => {
             const count = snapshot.val() || 0;
             document.getElementById('likeCount').textContent = count;
+            debugLog(`いいね数更新: ${count}`);
         });
 
         document.getElementById('likeBtn').addEventListener('click', () => {
+            debugLog('いいねボタンクリック');
             likesRef.transaction((current) => {
                 return (current || 0) + 1;
             });
@@ -150,8 +177,10 @@
         // コメント機能（リアルタイム更新）
         document.getElementById('commentBtn').addEventListener('click', () => {
             const text = document.getElementById('commentInput').value;
+            debugLog('コメント送信ボタンクリック');
             if (!text.trim()) {
                 alert('コメントを入力してください');
+                debugLog('エラー: コメントが空です');
                 return;
             }
             
@@ -159,23 +188,33 @@
                 text,
                 timestamp: Date.now(),
                 likes: 0
+            }).then(() => {
+                debugLog('コメント送信完了');
+                document.getElementById('commentInput').value = '';
+            }).catch(error => {
+                debugLog(`エラー: コメント送信失敗 - ${error.message}`);
             });
-            
-            document.getElementById('commentInput').value = '';
         });
 
         // コメントをリアルタイムで取得して表示
         commentsRef.on('value', (snapshot) => {
+            debugLog('Firebaseコメントデータ更新検知');
             const commentList = document.getElementById('commentList');
+            if (!commentList) {
+                debugLog('エラー: commentList要素が見つかりません');
+                return;
+            }
+            
             commentList.innerHTML = '';
             
             if (!snapshot.exists()) {
+                debugLog('コメントがありません');
                 commentList.innerHTML = '<p>コメントはまだありません</p>';
                 return;
             }
             
             const comments = snapshot.val();
-            const commentListElements = [];
+            debugLog(`コメント取得完了: ${Object.keys(comments).length}件`);
             
             // コメントを日時順にソート
             const sortedComments = Object.entries(comments)
@@ -198,6 +237,7 @@
                     </div>
                 `;
                 commentList.appendChild(div);
+                debugLog(`コメント表示完了: ${comment.id}`);
             });
         });
 
@@ -205,10 +245,14 @@
         document.getElementById('commentList').addEventListener('click', function(e) {
             if (e.target.classList.contains('like-comment-btn')) {
                 const commentId = e.target.dataset.id;
+                debugLog(`コメントいいねクリック: ${commentId}`);
                 const commentRef = firebase.database().ref('posts/' + slug + '/comments/' + commentId + '/likes');
                 
                 commentRef.transaction(current => {
+                    debugLog(`コメントいいね更新: ${commentId}`);
                     return (current || 0) + 1;
+                }).catch(error => {
+                    debugLog(`エラー: コメントいいね更新失敗 - ${error.message}`);
                 });
             }
         });
@@ -224,7 +268,12 @@
                 const likeCount = commentElement.querySelector('.comment-like-count');
                 if (likeCount) {
                     likeCount.textContent = comment.likes || 0;
+                    debugLog(`コメントいいね数更新: ${commentId} - ${comment.likes || 0}`);
+                } else {
+                    debugLog(`エラー: コメントいいね表示要素が見つかりません - ${commentId}`);
                 }
+            } else {
+                debugLog(`エラー: コメント要素が見つかりません - ${commentId}`);
             }
         });
     </script>
