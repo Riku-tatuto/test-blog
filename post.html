@@ -1,58 +1,123 @@
 <!DOCTYPE html>
-<html>
+<html lang="ja">
 <head>
-    <title>Test Blog</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Blog - 投稿</title>
     <link rel="stylesheet" href="style.css">
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    
     <!-- Firebase SDK -->
     <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-database-compat.js"></script>
-
-    <!-- Octokit -->
-    <script type="module">
-        import { Octokit } from "https://cdn.jsdelivr.net/npm/@octokit/core@4.0.1/dist-esm/index.js";
-        window.Octokit = Octokit;
-    </script>
 </head>
 <body>
     <div class="post-container">
-        <div id="post-content"></div>
+        <div id="post-header" class="post-header">
+            <h1 id="post-title">読み込み中...</h1>
+            <div id="post-meta" class="post-meta">
+                <span id="post-date">日付を読み込み中...</span>
+            </div>
+        </div>
+        
+        <div id="post-content" class="post-content">
+            <!-- 記事が表示される -->
+        </div>
         
         <div class="interaction">
-            <button id="likeBtn">👍 いいね</button>
-            <span id="likeCount">0</span>
+            <button id="likeBtn" class="like-button">👍 いいね</button>
+            <span id="likeCount" class="like-count">0</span>
             
             <div class="comments">
+                <h3>コメント</h3>
                 <textarea id="commentInput" placeholder="コメントを入力..."></textarea>
-                <button id="commentBtn">送信</button>
-                <div id="commentList"></div>
+                <button id="commentBtn" class="comment-button">送信</button>
+                <div id="commentList" class="comment-list"></div>
             </div>
         </div>
     </div>
 
-    <script>
-        // Firebase初期化コードは省略（上記を参照）
+    <script type="module">
+        // Firebase初期化
+        const firebaseConfig = {
+            apiKey: "AIzaSyACaRzcxYiSnko-L0cemRaT_SYRHjOi8tY",
+            authDomain: "online-chat-5daf8.firebaseapp.com",
+            databaseURL: "https://online-chat-5daf8-default-rtdb.firebaseio.com",
+            projectId: "online-chat-5daf8",
+            storageBucket: "online-chat-5daf8.firebasestorage.app",
+            messagingSenderId: "499641724634",
+            appId: "1:499641724634:web:6da05eb79bea5893aaffe3",
+            measurementId: "G-6B5T0TDER9"
+        };
 
+        // Firebase初期化
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.10/firebase-app-compat.js";
+        import { getDatabase, ref, onValue, push, transaction } from "https://www.gstatic.com/firebasejs/9.6.10/firebase-database-compat.js";
+
+        const app = initializeApp(firebaseConfig);
+        const database = getDatabase(app);
+        window.firebase = { app, database };
+    </script>
+
+    <script>
+        // URLパラメータからスラグを取得
         const urlParams = new URLSearchParams(window.location.search);
         const slug = urlParams.get('slug');
-        const postRef = database.ref('posts/' + slug);
-        const likesRef = postRef.child('likes');
-        const commentsRef = postRef.child('comments');
+        
+        if (!slug) {
+            document.getElementById('post-content').innerHTML = 
+                '<p>有効な記事URLが指定されていません</p>';
+            throw new Error('スラグが指定されていません');
+        }
 
-        // 記事コンテンツ読み込み
+        // 記事コンテンツをGitHubから取得して表示
         fetch(`https://raw.githubusercontent.com/riku-tatuto/test-blog/main/posts/${slug}.md`)
-            .then(response => response.text())
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('記事の取得に失敗しました');
+                }
+                return response.text();
+            })
             .then(text => {
                 document.getElementById('post-content').innerHTML = marked.parse(text);
+                
+                // タイトルを抽出して表示
+                const firstLine = text.split('\n')[0];
+                if (firstLine.startsWith('# ')) {
+                    const title = firstLine.substring(2).trim();
+                    document.getElementById('post-title').textContent = title;
+                }
+                
+                // 日付を取得（posts.jsonから）
+                return fetch('https://raw.githubusercontent.com/riku-tatuto/test-blog/main/posts.json');
+            })
+            .then(response => response.json())
+            .then(posts => {
+                const post = posts.find(p => p.slug === slug);
+                if (post) {
+                    document.getElementById('post-date').textContent = 
+                        `公開日: ${new Date(post.date).toLocaleDateString('ja-JP')}`;
+                }
+            })
+            .catch(error => {
+                console.error('エラー:', error);
+                document.getElementById('post-content').innerHTML = 
+                    '<p>記事の読み込み中にエラーが発生しました</p>';
             });
 
+        // Firebase参照を設定
+        const postRef = ref(window.firebase.database, 'posts/' + slug);
+        const likesRef = ref(window.firebase.database, 'posts/' + slug + '/likes');
+        const commentsRef = ref(window.firebase.database, 'posts/' + slug + '/comments');
+
         // いいね機能
-        likesRef.on('value', snapshot => {
-            document.getElementById('likeCount').textContent = snapshot.val() || 0;
+        onValue(likesRef, (snapshot) => {
+            const count = snapshot.val() || 0;
+            document.getElementById('likeCount').textContent = count;
         });
 
         document.getElementById('likeBtn').addEventListener('click', () => {
-            likesRef.transaction(current => {
+            transaction(likesRef, (current) => {
                 return (current || 0) + 1;
             });
         });
@@ -60,9 +125,12 @@
         // コメント機能
         document.getElementById('commentBtn').addEventListener('click', () => {
             const text = document.getElementById('commentInput').value;
-            if (!text) return;
+            if (!text.trim()) {
+                alert('コメントを入力してください');
+                return;
+            }
             
-            commentsRef.push({
+            push(commentsRef, {
                 text,
                 timestamp: Date.now(),
                 likes: 0
@@ -71,15 +139,30 @@
             document.getElementById('commentInput').value = '';
         });
 
-        commentsRef.on('child_added', snapshot => {
-            const comment = snapshot.val();
-            const div = document.createElement('div');
-            div.className = 'comment';
-            div.innerHTML = `
-                <p>${comment.text}</p>
-                <small>${new Date(comment.timestamp).toLocaleString()}</small>
-            `;
-            document.getElementById('commentList').appendChild(div);
+        onValue(commentsRef, (snapshot) => {
+            const commentList = document.getElementById('commentList');
+            commentList.innerHTML = '';
+            
+            if (!snapshot.exists()) {
+                commentList.innerHTML = '<p>コメントはまだありません</p>';
+                return;
+            }
+            
+            snapshot.forEach((childSnapshot) => {
+                const comment = childSnapshot.val();
+                const div = document.createElement('div');
+                div.className = 'comment';
+                div.innerHTML = `
+                    <p>${comment.text}</p>
+                    <div class="comment-footer">
+                        <small>${new Date(comment.timestamp).toLocaleString('ja-JP')}</small>
+                        <span class="comment-likes">
+                            👍 ${comment.likes || 0}
+                        </span>
+                    </div>
+                `;
+                commentList.appendChild(div);
+            });
         });
     </script>
 </body>
