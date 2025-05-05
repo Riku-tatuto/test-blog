@@ -110,6 +110,11 @@
         }
         debugLog(`スラグ取得完了: ${slug}`);
 
+        // Firebase参照の再定義（より明示的に）
+        const postRef = firebase.database().ref('posts/' + slug);
+        const likesRef = firebase.database().ref('posts/' + slug + '/likes');
+        const commentsRef = firebase.database().ref('posts/' + slug + '/comments');
+
         // 記事コンテンツをGitHubから取得して表示
         fetch(`https://raw.githubusercontent.com/riku-tatuto/test-blog/main/posts/${slug}.md`)
             .then(response => {
@@ -120,7 +125,6 @@
                 return response.text();
             })
             .then(text => {
-                debugLog('GitHub記事解析開始');
                 document.getElementById('post-content').innerHTML = marked.parse(text);
                 
                 // タイトルを抽出して表示
@@ -154,11 +158,6 @@
                 document.getElementById('post-content').innerHTML = 
                     '<p>記事の読み込み中にエラーが発生しました</p>';
             });
-
-        // リアルタイムデータベース参照
-        const postRef = firebase.database().ref('posts/' + slug);
-        const likesRef = firebase.database().ref('posts/' + slug + '/likes');
-        const commentsRef = firebase.database().ref('posts/' + slug + '/comments');
 
         // いいね機能（リアルタイム更新）
         likesRef.on('value', (snapshot) => {
