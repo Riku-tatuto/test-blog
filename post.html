@@ -12,6 +12,7 @@
     <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-database-compat.js"></script>
 </head>
 <body>
+    <!-- 記事コンテナのクラス名をpost-container-wideに変更 -->
     <div class="post-container-wide">
         <div id="post-header" class="post-header">
             <h1 id="post-title">読み込み中...</h1>
@@ -101,12 +102,12 @@
                     '<p>記事の読み込み中にエラーが発生しました</p>';
             });
 
-        // Firebase参照を設定
+        // リアルタイムデータベース参照
         const postRef = firebase.database().ref('posts/' + slug);
         const likesRef = firebase.database().ref('posts/' + slug + '/likes');
         const commentsRef = firebase.database().ref('posts/' + slug + '/comments');
 
-        // いいね機能
+        // いいね機能（リアルタイム更新）
         likesRef.on('value', (snapshot) => {
             const count = snapshot.val() || 0;
             document.getElementById('likeCount').textContent = count;
@@ -118,7 +119,7 @@
             });
         });
 
-        // コメント機能
+        // コメント機能（リアルタイム更新）
         document.getElementById('commentBtn').addEventListener('click', () => {
             const text = document.getElementById('commentInput').value;
             if (!text.trim()) {
@@ -135,20 +136,50 @@
             document.getElementById('commentInput').value = '';
         });
 
+        // 新しいコメントをリアルタイムで反映
         commentsRef.on('child_added', (snapshot) => {
             const comment = snapshot.val();
+            const commentId = snapshot.key;
             const div = document.createElement('div');
             div.className = 'comment';
+            div.setAttribute('data-id', commentId);
             div.innerHTML = `
                 <p>${comment.text}</p>
                 <div class="comment-footer">
                     <small>${new Date(comment.timestamp).toLocaleString('ja-JP')}</small>
-                    <span class="comment-likes">
-                        👍 ${comment.likes || 0}
-                    </span>
+                    <div class="comment-actions">
+                        <button class="like-comment-btn" data-id="${commentId}">👍 いいね</button>
+                        <span class="comment-like-count">${comment.likes || 0}</span>
+                    </div>
                 </div>
             `;
             document.getElementById('commentList').appendChild(div);
+        });
+
+        // コメントに対するいいね機能
+        document.getElementById('commentList').addEventListener('click', function(e) {
+            if (e.target.classList.contains('like-comment-btn')) {
+                const commentId = e.target.dataset.id;
+                const commentRef = firebase.database().ref('posts/' + slug + '/comments/' + commentId + '/likes');
+                
+                commentRef.transaction(current => {
+                    return (current || 0) + 1;
+                });
+            }
+        });
+
+        // コメントのいいね数をリアルタイムで更新
+        commentsRef.on('child_changed', (snapshot) => {
+            const comment = snapshot.val();
+            const commentId = snapshot.key;
+            
+            const commentElement = document.querySelector(`.comment[data-id="${commentId}"]`);
+            if (commentElement) {
+                const likeCount = commentElement.querySelector('.comment-like-count');
+                if (likeCount) {
+                    likeCount.textContent = comment.likes || 0;
+                }
+            }
         });
     </script>
 </body>
