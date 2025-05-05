@@ -326,3 +326,24 @@ textarea {
         font-size: 1.5rem;
     }
 }
+
+/* 投稿ページの幅を広げる */
+.post-container-wide {
+    max-width: 1000px;
+    margin: 2rem auto;
+    padding: 2rem;
+    background: var(--card-background);
+    border-radius: var(--border-radius);
+    box-shadow: var(--box-shadow);
+}
+
+/* モバイル用の最適化 */
+@media (max-width: 960px) {
+    .post-container-wide {
+        max-width: 90%;
+    }
+    
+    .post-header h1 {
+        font-size: 1.75rem;
+    }
+}
