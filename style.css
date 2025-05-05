@@ -1,4 +1,8 @@
 /* 共通スタイル */
+body {
+    padding-top: 70px; /* ナビゲーションバーの高さ分の余白 */
+}
+
 :root {
     --primary-color: #4a90e2;
     --secondary-color: #ff6b6b;
