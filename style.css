@@ -416,3 +416,118 @@ textarea {
         padding: 2rem;
     }
 }
+
+/* ナビゲーションバー */
+.navbar {
+    background: var(--card-background);
+    box-shadow: var(--box-shadow);
+    padding: 1rem 0;
+    position: fixed;
+    top: 0;
+    width: 100%;
+    z-index: 1000;
+}
+
+.navbar .container {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.navbar-brand {
+    font-size: 1.25rem;
+    font-weight: bold;
+    color: var(--primary-color);
+}
+
+.nav-links {
+    display: flex;
+    gap: 1.5rem;
+    list-style: none;
+    margin: 0;
+    padding: 0;
+}
+
+.nav-links li a {
+    color: var(--text-color);
+    text-decoration: none;
+    font-weight: 500;
+}
+
+.nav-links li a:hover {
+    color: var(--primary-color);
+}
+
+/* コンテンツのマージン（ナビゲーションバー分） */
+.post-main {
+    margin-top: 70px;
+    flex: 1;
+}
+
+/* パンくずリスト */
+.breadcrumb {
+    margin: 1.5rem 0;
+    font-size: 0.95rem;
+    color: #666;
+}
+
+.breadcrumb a {
+    color: var(--primary-color);
+    text-decoration: none;
+}
+
+.breadcrumb a:hover {
+    text-decoration: underline;
+}
+
+/* 記事ページの幅を最大まで拡大 */
+.post-container-full {
+    max-width: 100%;
+    width: 100%;
+    margin: 2rem auto;
+    padding: 2rem;
+    background: var(--card-background);
+    border-radius: var(--border-radius);
+    box-shadow: var(--box-shadow);
+}
+
+/* モバイル用の最適化 */
+@media (max-width: 960px) {
+    .navbar .container {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 1rem;
+    }
+    
+    .nav-links {
+        width: 100%;
+        justify-content: space-between;
+    }
+    
+    .post-container-full {
+        padding: 1.5rem;
+    }
+    
+    .post-header h1 {
+        font-size: 1.75rem;
+    }
+    
+    .comment-actions {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+    
+    .like-comment-btn {
+        width: 100%;
+        text-align: center;
+    }
+}
+
+/* レスポンシブデザインの最適化 */
+@media (min-width: 1200px) {
+    .post-container-full {
+        max-width: 1200px;
+        margin: 2rem auto;
+        padding: 2rem;
+    }
+}
