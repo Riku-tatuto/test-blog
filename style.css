@@ -1,10 +1,34 @@
 /* 共通スタイル */
-body {
-    font-family: 'Segoe UI', sans-serif;
+:root {
+    --primary-color: #4a90e2;
+    --secondary-color: #ff6b6b;
+    --background-color: #f5f7fa;
+    --text-color: #333;
+    --card-background: #ffffff;
+    --border-radius: 10px;
+    --box-shadow: 0 0 10px rgba(0, 0, 0, 0.05);
+}
+
+* {
+    box-sizing: border-box;
     margin: 0;
     padding: 0;
-    background: #f5f7fa;
-    color: #333;
+}
+
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    line-height: 1.6;
+    color: var(--text-color);
+    background-color: var(--background-color);
+}
+
+a {
+    color: var(--primary-color);
+    text-decoration: none;
+}
+
+a:hover {
+    text-decoration: underline;
 }
 
 /* 管理画面 */
@@ -12,28 +36,43 @@ body {
     max-width: 800px;
     margin: 2rem auto;
     padding: 2rem;
-    background: white;
-    border-radius: 10px;
-    box-shadow: 0 0 10px rgba(0,0,0,0.1);
+    background: var(--card-background);
+    border-radius: var(--border-radius);
+    box-shadow: var(--box-shadow);
+}
+
+.admin-container h1 {
+    margin-bottom: 1.5rem;
+    text-align: center;
+    color: var(--primary-color);
 }
 
 input, textarea {
     width: 100%;
     padding: 1rem;
-    margin: 1rem 0;
+    margin: 0.5rem 0 1rem;
     border: 1px solid #ddd;
-    border-radius: 5px;
+    border-radius: var(--border-radius);
     font-size: 1rem;
+    font-family: inherit;
+    transition: border-color 0.3s;
+}
+
+input:focus, textarea:focus {
+    border-color: var(--primary-color);
+    outline: none;
 }
 
 button {
     padding: 0.8rem 2rem;
-    background: #4a90e2;
+    background: var(--primary-color);
     color: white;
     border: none;
-    border-radius: 5px;
+    border-radius: var(--border-radius);
     cursor: pointer;
     font-size: 1rem;
+    font-weight: bold;
+    transition: background 0.3s;
 }
 
 button:hover {
@@ -43,6 +82,7 @@ button:hover {
 textarea {
     height: 300px;
     resize: vertical;
+    font-family: monospace;
 }
 
 /* 記事ページ */
@@ -50,9 +90,27 @@ textarea {
     max-width: 800px;
     margin: 2rem auto;
     padding: 2rem;
-    background: white;
-    border-radius: 10px;
-    box-shadow: 0 0 10px rgba(0,0,0,0.1);
+    background: var(--card-background);
+    border-radius: var(--border-radius);
+    box-shadow: var(--box-shadow);
+}
+
+.post-header {
+    margin-bottom: 2rem;
+    padding-bottom: 1rem;
+    border-bottom: 1px solid #eee;
+}
+
+.post-header h1 {
+    font-size: 2rem;
+    margin-bottom: 0.5rem;
+}
+
+.post-meta {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    color: #666;
 }
 
 .interaction {
@@ -61,25 +119,62 @@ textarea {
     border-top: 1px solid #eee;
 }
 
-#likeBtn {
-    background: #ff6b6b;
+.like-button {
+    background: var(--secondary-color);
     margin-right: 1rem;
 }
 
-.comments {
-    margin-top: 1rem;
+.like-count {
+    font-weight: bold;
+    margin-left: 0.5rem;
 }
 
-#commentInput {
-    height: 100px;
+.comments {
+    margin-top: 1.5rem;
+}
+
+.comments h3 {
+    margin-bottom: 0.5rem;
+}
+
+.comment-input {
+    width: 100%;
+    padding: 1rem;
+    margin-bottom: 1rem;
+    border: 1px solid #ddd;
+    border-radius: var(--border-radius);
+    font-size: 1rem;
+    resize: vertical;
+}
+
+.comment-button {
     margin-bottom: 1rem;
 }
 
+.comment-list {
+    margin-top: 1rem;
+}
+
 .comment {
-    background: #f0f0f0;
+    background: #f8f9fa;
     padding: 1rem;
-    border-radius: 5px;
+    border-radius: var(--border-radius);
     margin: 0.5rem 0;
+    border: 1px solid #eee;
+}
+
+.comment-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 0.5rem;
+    font-size: 0.9rem;
+    color: #888;
+}
+
+.comment-likes {
+    color: var(--secondary-color);
+    font-weight: bold;
 }
 
 /* メインページ */
@@ -88,17 +183,46 @@ textarea {
     text-align: center;
 }
 
-.post-card {
-    background: white;
-    margin: 1rem auto;
-    padding: 1.5rem;
-    border-radius: 10px;
-    max-width: 600px;
-    box-shadow: 0 0 10px rgba(0,0,0,0.05);
-    text-align: left;
+.posts-grid {
+    display: grid;
+    gap: 1.5rem;
+    margin-top: 2rem;
 }
 
-.post-card a {
-    color: #333;
-    text-decoration: none;
+.post-card {
+    background: var(--card-background);
+    margin: 1rem auto;
+    padding: 1.5rem;
+    border-radius: var(--border-radius);
+    box-shadow: var(--box-shadow);
+    text-align: left;
+    transition: transform 0.3s;
+}
+
+.post-card:hover {
+    transform: translateY(-5px);
+}
+
+.post-card h2 {
+    font-size: 1.5rem;
+    margin-bottom: 0.5rem;
+}
+
+.post-card small {
+    color: #666;
+}
+
+/* レスポンシブデザイン */
+@media (max-width: 768px) {
+    .post-card {
+        padding: 1rem;
+    }
+    
+    .post-header h1 {
+        font-size: 1.5rem;
+    }
+    
+    input, textarea {
+        font-size: 0.95rem;
+    }
 }
