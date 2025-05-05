@@ -13,20 +13,14 @@
 <body>
     <div class="admin-container">
         <h1>記事投稿</h1>
-
-        <div id="status" class="status-message">
-            GitHub API準備中...
-        </div>
-
-        <div id="form-container" class="hidden">
-            <form id="postForm">
-                <input type="text" id="token" placeholder="GitHub Personal Access Token" required>
-                <input type="text" id="slug" placeholder="記事URLスラグ（例: my-first-post）" required>
-                <input type="text" id="title" placeholder="記事タイトル" required>
-                <textarea id="content" placeholder="Markdown形式でコンテンツを入力..." required></textarea>
-                <button type="submit">投稿する</button>
-            </form>
-        </div>
+        <form id="postForm">
+            <input type="text" id="token" placeholder="GitHub Personal Access Token" required>
+            <input type="text" id="slug" placeholder="記事URLスラグ（例: my-first-post）" required>
+            <input type="text" id="title" placeholder="記事タイトル" required>
+            <input type="url" id="thumbnail" placeholder="サムネイル画像URL（オプション）" optional>
+            <textarea id="content" placeholder="Markdown形式でコンテンツを入力..." required></textarea>
+            <button type="submit">投稿する</button>
+        </form>
     </div>
 
     <script>
@@ -42,155 +36,93 @@
             measurementId: "G-6B5T0TDER9"
         };
 
-        firebase.initializeApp(firebaseConfig);
-        const database = firebase.database();
+        // Firebase初期化
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.10/firebase-app-compat.js";
+        import { getDatabase, ref, set } from "https://www.gstatic.com/firebasejs/9.6.10/firebase-database-compat.js";
         
-        // GitHub API用の基本設定
-        const owner = 'riku-tatuto';
-        const repo = 'test-blog';
-        const apiBase = 'https://api.github.com';
-        const headers = {
-            'Authorization': '',
-            'Accept': 'application/vnd.github.v3+json',
-            'Content-Type': 'application/json'
-        };
-
-        document.getElementById('status').textContent = '準備完了';
-        document.getElementById('form-container').classList.remove('hidden');
+        const app = initializeApp(firebaseConfig);
+        const database = getDatabase(app);
+        window.firebase = { app, database };
     </script>
 
     <script>
-        // Base64エンコーダー
-        function utf8ToBase64(str) {
-            return btoa(unescape(encodeURIComponent(str)));
-        }
-
-        // ファイルSHA取得関数（404は無視）
-        async function getGithubFileSha(token, path) {
-            headers.Authorization = `Bearer ${token}`;
-            const url = `${apiBase}/repos/${owner}/${repo}/contents/${path}`;
-            
-            try {
-                const response = await fetch(url, { headers });
-                if (!response.ok) return null;
-                const data = await response.json();
-                return data.sha;
-            } catch (error) {
-                console.error('SHA取得エラー:', error);
-                return null;
-            }
-        }
-
-        // 投稿処理
         document.getElementById('postForm').addEventListener('submit', async function(e) {
             e.preventDefault();
+            
             const token = document.getElementById('token').value;
             const slug = document.getElementById('slug').value;
             const title = document.getElementById('title').value;
+            const thumbnail = document.getElementById('thumbnail').value;
             const content = document.getElementById('content').value;
-
+            
             if (!token || !slug || !title || !content) {
-                alert('すべてのフィールドを入力してください');
+                alert('必須フィールドをすべて入力してください');
                 return;
             }
-
+            
             try {
+                const octokit = new Octokit({ auth: token });
+                const owner = 'riku-tatuto';
+                const repo = 'test-blog';
+
                 // 記事Markdownファイル作成
                 const markdownContent = `# ${title}\n\n${content}`;
-                const filePath = `posts/${slug}.md`;
-                
-                // 既存ファイルのSHA取得（存在しない場合はnull）
-                const fileSha = await getGithubFileSha(token, filePath);
-
-                const fileData = {
-                    message: fileSha ? `Update ${slug} post` : `Add ${slug} post`,
-                    content: utf8ToBase64(markdownContent)
-                };
-
-                // SHAがある場合は更新、ない場合は新規作成
-                if (fileSha) {
-                    fileData.sha = fileSha;
-                }
-
-                const putResponse = await fetch(`${apiBase}/repos/${owner}/${repo}/contents/${filePath}`, {
-                    method: 'PUT',
-                    headers: {
-                        'Authorization': `Bearer ${token}`,
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify(fileData)
+                await octokit.request('PUT /repos/{owner}/{repo}/contents/posts/{path}', {
+                    owner,
+                    repo,
+                    path: `${slug}.md`,
+                    message: `Add ${slug} post`,
+                    content: btoa(unescape(encodeURIComponent(markdownContent)))
                 });
-
-                if (!putResponse.ok) {
-                    const errorData = await putResponse.json();
-                    throw new Error(`GitHub APIエラー: ${errorData.message}`);
-                }
 
                 // posts.json更新
                 let posts = [];
                 try {
-                    const postsResponse = await fetch('https://raw.githubusercontent.com/riku-tatuto/test-blog/main/posts.json');
-                    if (postsResponse.ok) {
-                        posts = await postsResponse.json();
-                    }
+                    const { data } = await octokit.request('GET /repos/{owner}/{repo}/contents/posts.json', {
+                        owner, repo
+                    });
+                    const response = await fetch(data.download_url);
+                    posts = await response.json();
                 } catch (e) {
-                    console.log('posts.jsonが見つかりません（これは初回投稿時は正常です）');
+                    console.log('posts.jsonが見つかりません');
                 }
 
-                // 投稿日時をISO形式で追加
                 const now = new Date().toISOString();
                 
-                // 既存の記事が存在するかチェック
-                const existingPostIndex = posts.findIndex(post => post.slug === slug);
+                // 投稿日時の新しい順にソート
+                const existingIndex = posts.findIndex(post => post.slug === slug);
                 
-                if (existingPostIndex > -1) {
-                    // 既存記事の更新
-                    posts[existingPostIndex] = {
-                        slug,
-                        title,
-                        date: now
+                if (existingIndex > -1) {
+                    // 既存記事を更新
+                    posts[existingIndex] = {
+                        slug, 
+                        title, 
+                        date: now,
+                        thumbnail: thumbnail || posts[existingIndex].thumbnail
                     };
                 } else {
-                    // 新規記事の追加
+                    // 新規記事を追加
                     posts.push({
                         slug, 
                         title, 
-                        date: now
+                        date: now,
+                        thumbnail: thumbnail || ''
                     });
                 }
 
-                const postsFilePath = 'posts.json';
-                const postsSha = await getGithubFileSha(token, postsFilePath);
-
-                const postsFileData = {
-                    message: postsSha ? 'Update posts.json' : 'Create posts.json',
-                    content: utf8ToBase64(JSON.stringify(posts, null, 2))
-                };
-
-                // posts.jsonが存在する場合はSHAを追加
-                if (postsSha) {
-                    postsFileData.sha = postsSha;
-                }
-
-                const postsPutResponse = await fetch(`${apiBase}/repos/${owner}/${repo}/contents/${postsFilePath}`, {
-                    method: 'PUT',
-                    headers: {
-                        'Authorization': `Bearer ${token}`,
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify(postsFileData)
+                await octokit.request('PUT /repos/{owner}/{repo}/contents/posts.json', {
+                    owner,
+                    repo,
+                    path: 'posts.json',
+                    message: 'Update posts.json',
+                    content: btoa(unescape(encodeURIComponent(JSON.stringify(posts, null, 2)))
                 });
-
-                if (!postsPutResponse.ok) {
-                    const errorData = await postsPutResponse.json();
-                    throw new Error(`posts.json更新失敗: ${errorData.message}`);
-                }
 
                 alert('投稿が完了しました！');
                 document.getElementById('postForm').reset();
             } catch (error) {
-                console.error('投稿エラー:', error);
-                alert(`投稿に失敗しました: ${error.message}`);
+                console.error('エラー:', error);
+                alert('投稿に失敗しました。GitHubの資格情報を確認してください。');
             }
         });
     </script>
