@@ -1,29 +1,48 @@
 <!DOCTYPE html>
-<html>
+<html lang="ja">
 <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Test Blog</title>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
     <div class="blog-container">
         <h1>Test Blog</h1>
-        <div id="posts"></div>
+        <div id="posts" class="posts-grid"></div>
     </div>
 
     <script>
+        // 記事一覧をGitHubから取得して表示
         fetch('https://raw.githubusercontent.com/riku-tatuto/test-blog/main/posts.json')
-            .then(response => response.json())
+            .then(response => {
+                if (!response.ok) throw new Error('記事リストの取得に失敗しました');
+                return response.json();
+            })
             .then(posts => {
                 const container = document.getElementById('posts');
-                posts.forEach(post => {
-                    const card = document.createElement('div');
-                    card.className = 'post-card';
-                    card.innerHTML = `
-                        <h2><a href="post.html?slug=${post.slug}">${post.title}</a></h2>
-                        <small>${new Date(post.date).toLocaleDateString()}</small>
-                    `;
-                    container.appendChild(card);
-                });
+                if (!container) return;
+                
+                if (posts.length === 0) {
+                    container.innerHTML = '<p>記事がありません</p>';
+                    return;
+                }
+
+                posts.sort((a, b) => new Date(b.date) - new Date(a.date))
+                    .forEach(post => {
+                        const card = document.createElement('div');
+                        card.className = 'post-card';
+                        card.innerHTML = `
+                            <h2><a href="post.html?slug=${post.slug}">${post.title}</a></h2>
+                            <small>${new Date(post.date).toLocaleDateString('ja-JP')}</small>
+                        `;
+                        container.appendChild(card);
+                    });
+            })
+            .catch(error => {
+                console.error('エラー:', error);
+                document.getElementById('posts').innerHTML = 
+                    '<p>記事の読み込み中にエラーが発生しました</p>';
             });
     </script>
 </body>
