@@ -1,14 +1,16 @@
 <!DOCTYPE html>
-<html>
+<html lang="ja">
 <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Admin - Test Blog</title>
     <link rel="stylesheet" href="style.css">
-
+    
     <!-- Firebase SDK -->
     <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-database-compat.js"></script>
-
-    <!-- Octokit（最新バージョン） -->
+    
+    <!-- Octokit (GitHub API用) -->
     <script type="module">
         import { Octokit } from "https://cdn.jsdelivr.net/npm/@octokit/core@4.3.0/dist-esm/index.js";
         window.Octokit = Octokit;
@@ -19,27 +21,60 @@
         <h1>記事投稿</h1>
         <form id="postForm">
             <input type="text" id="token" placeholder="GitHub Personal Access Token" required>
-            <input type="text" id="slug" placeholder="記事URLスラグ" required>
+            <input type="text" id="slug" placeholder="記事URLスラグ（例: my-first-post）" required>
             <input type="text" id="title" placeholder="記事タイトル" required>
             <textarea id="content" placeholder="Markdown形式でコンテンツを入力..." required></textarea>
             <button type="submit">投稿する</button>
         </form>
     </div>
 
+    <script type="module">
+        // Firebase初期化
+        const firebaseConfig = {
+            apiKey: "AIzaSyACaRzcxYiSnko-L0cemRaT_SYRHjOi8tY",
+            authDomain: "online-chat-5daf8.firebaseapp.com",
+            databaseURL: "https://online-chat-5daf8-default-rtdb.firebaseio.com",
+            projectId: "online-chat-5daf8",
+            storageBucket: "online-chat-5daf8.firebasestorage.app",
+            messagingSenderId: "499641724634",
+            appId: "1:499641724634:web:6da05eb79bea5893aaffe3",
+            measurementId: "G-6B5T0TDER9"
+        };
+
+        // Firebase初期化
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.10/firebase-app-compat.js";
+        import { getDatabase, ref, set } from "https://www.gstatic.com/firebasejs/9.6.10/firebase-database-compat.js";
+        
+        const app = initializeApp(firebaseConfig);
+        const database = getDatabase(app);
+        window.firebase = { app, database };
+    </script>
+
     <script>
         document.getElementById('postForm').addEventListener('submit', async function(e) {
             e.preventDefault();
             
+            // Octokitが読み込まれるまで待つ
+            if (typeof window.Octokit === 'undefined') {
+                alert('Octokitがまだ読み込まれていません。ページを再読み込みしてください。');
+                return;
+            }
+
             const token = document.getElementById('token').value;
             const slug = document.getElementById('slug').value;
             const title = document.getElementById('title').value;
             const content = document.getElementById('content').value;
             
-            const octokit = new window.Octokit({ auth: token });
-            const owner = 'riku-tatuto';
-            const repo = 'test-blog';
-
+            if (!token || !slug || !title || !content) {
+                alert('すべてのフィールドを入力してください');
+                return;
+            }
+            
             try {
+                const octokit = new window.Octokit({ auth: token });
+                const owner = 'riku-tatuto';
+                const repo = 'test-blog';
+
                 // 記事Markdownファイル作成
                 const markdownContent = `# ${title}\n\n${content}`;
                 await octokit.request('PUT /repos/{owner}/{repo}/contents/posts/{path}', {
@@ -80,35 +115,9 @@
                 document.getElementById('postForm').reset();
             } catch (error) {
                 console.error('エラー:', error);
-                alert('投稿に失敗しました。');
+                alert('投稿に失敗しました。GitHubの資格情報を確認してください。');
             }
         });
-    </script>
-
-    <script type="module">
-        // OctokitとFirebaseの初期化を非同期で実行
-        import { Octokit } from "https://cdn.jsdelivr.net/npm/@octokit/core@4.3.0/dist-esm/index.js";
-        window.Octokit = Octokit;
-    
-        // Firebase設定
-        const firebaseConfig = {
-            apiKey: "AIzaSyACaRzcxYiSnko-L0cemRaT_SYRHjOi8tY",
-            authDomain: "online-chat-5daf8.firebaseapp.com",
-            databaseURL: "https://online-chat-5daf8-default-rtdb.firebaseio.com",
-            projectId: "online-chat-5daf8",
-            storageBucket: "online-chat-5daf8.firebasestorage.app",
-            messagingSenderId: "499641724634",
-            appId: "1:499641724634:web:6da05eb79bea5893aaffe3",
-            measurementId: "G-6B5T0TDER9"
-        };
-    
-        // Firebase初期化
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.10/firebase-app-compat.js";
-        import { getDatabase } from "https://www.gstatic.com/firebasejs/9.6.10/firebase-database-compat.js";
-    
-        const app = initializeApp(firebaseConfig);
-        const database = getDatabase(app);
-        window.firebase = { app, database };
     </script>
 </body>
 </html>
