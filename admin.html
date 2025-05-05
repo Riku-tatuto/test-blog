@@ -10,19 +10,26 @@
     <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-database-compat.js"></script>
     
-    <!-- Octokit (GitHub API用) -->
-    <script src="https://cdn.jsdelivr.net/npm/@octokit/core@4.3.0/dist/index.min.js"></script>
+    <!-- Octokit UMDビルド（ブラウザで動作するように） -->
+    <script src="https://unpkg.com/@octokit/core@4.3.0/dist/index.min.js"></script>
 </head>
 <body>
     <div class="admin-container">
         <h1>記事投稿</h1>
-        <form id="postForm">
-            <input type="text" id="token" placeholder="GitHub Personal Access Token" required>
-            <input type="text" id="slug" placeholder="記事URLスラグ（例: my-first-post）" required>
-            <input type="text" id="title" placeholder="記事タイトル" required>
-            <textarea id="content" placeholder="Markdown形式でコンテンツを入力..." required></textarea>
-            <button type="submit">投稿する</button>
-        </form>
+
+        <div id="loading" class="loading-message">
+            Octokitを読み込んでいます...しばらくお待ちください。
+        </div>
+
+        <div id="form-container" class="hidden">
+            <form id="postForm">
+                <input type="text" id="token" placeholder="GitHub Personal Access Token" required>
+                <input type="text" id="slug" placeholder="記事URLスラグ（例: my-first-post）" required>
+                <input type="text" id="title" placeholder="記事タイトル" required>
+                <textarea id="content" placeholder="Markdown形式でコンテンツを入力..." required></textarea>
+                <button type="submit">投稿する</button>
+            </form>
+        </div>
     </div>
 
     <script>
@@ -38,78 +45,114 @@
             measurementId: "G-6B5T0TDER9"
         };
 
-        // Firebase初期化（compatバージョンではinitializeAppとdatabaseがグローバルに利用可能）
         firebase.initializeApp(firebaseConfig);
         const database = firebase.database();
     </script>
 
     <script>
-        document.getElementById('postForm').addEventListener('submit', async function(e) {
-            e.preventDefault();
-            
-            // Octokitが読み込まれるまで待つ
-            if (typeof Octokit === 'undefined') {
-                alert('Octokitがまだ読み込まれていません。ページを再読み込みしてください。');
-                return;
+        // Octokitロード確認とフォーム表示制御
+        const loadingEl = document.getElementById('loading');
+        const formContainerEl = document.getElementById('form-container');
+
+        function showForm() {
+            loadingEl.classList.add('hidden');
+            formContainerEl.classList.remove('hidden');
+        }
+
+        function showError(message) {
+            loadingEl.classList.add('hidden');
+            formContainerEl.innerHTML = `<div class="error-message">${message}</div>`;
+            formContainerEl.classList.remove('hidden');
+        }
+
+        // Octokitが存在するかチェック
+        function checkOctokitLoaded() {
+            if (typeof Octokit !== 'undefined') {
+                showForm();
+            } else {
+                showError('Octokitの読み込みに失敗しました。ページを再読み込みしてください。');
             }
+        }
 
-            const token = document.getElementById('token').value;
-            const slug = document.getElementById('slug').value;
-            const title = document.getElementById('title').value;
-            const content = document.getElementById('content').value;
-            
-            if (!token || !slug || !title || !content) {
-                alert('すべてのフィールドを入力してください');
-                return;
-            }
-            
-            try {
-                const octokit = new Octokit({ auth: token });
-                const owner = 'riku-tatuto';
-                const repo = 'test-blog';
+        // スクリプトのロード状態を監視
+        window.addEventListener('load', () => {
+            setTimeout(checkOctokitLoaded, 1000); // 少し待ってからチェック
+        });
+    </script>
 
-                // 記事Markdownファイル作成
-                const markdownContent = `# ${title}\n\n${content}`;
-                await octokit.request('PUT /repos/{owner}/{repo}/contents/posts/{path}', {
-                    owner,
-                    repo,
-                    path: `${slug}.md`,
-                    message: `Add ${slug} post`,
-                    content: btoa(unescape(encodeURIComponent(markdownContent)))
-                });
+    <script>
+        // 投稿処理
+        document.addEventListener('DOMContentLoaded', function () {
+            const form = document.getElementById('postForm');
 
-                // posts.json更新
-                let posts = [];
-                try {
-                    const { data } = await octokit.request('GET /repos/{owner}/{repo}/contents/posts.json', {
-                        owner, repo
-                    });
-                    const response = await fetch(data.download_url);
-                    posts = await response.json();
-                } catch (e) {
-                    console.log('posts.jsonが見つかりません');
+            if (!form) return;
+
+            form.addEventListener('submit', async function(e) {
+                e.preventDefault();
+
+                if (typeof Octokit === 'undefined') {
+                    alert('Octokitがまだ読み込まれていません。ページを再読み込みしてください。');
+                    return;
                 }
 
-                posts.push({
-                    slug, 
-                    title, 
-                    date: new Date().toISOString()
-                });
+                const token = document.getElementById('token').value;
+                const slug = document.getElementById('slug').value;
+                const title = document.getElementById('title').value;
+                const content = document.getElementById('content').value;
 
-                await octokit.request('PUT /repos/{owner}/{repo}/contents/posts.json', {
-                    owner,
-                    repo,
-                    path: 'posts.json',
-                    message: 'Update posts.json',
-                    content: btoa(unescape(encodeURIComponent(JSON.stringify(posts, null, 2))))
-                });
+                if (!token || !slug || !title || !content) {
+                    alert('すべてのフィールドを入力してください');
+                    return;
+                }
 
-                alert('投稿が完了しました！');
-                document.getElementById('postForm').reset();
-            } catch (error) {
-                console.error('エラー:', error);
-                alert('投稿に失敗しました。GitHubの資格情報を確認してください。');
-            }
+                try {
+                    const octokit = new Octokit({ auth: token });
+                    const owner = 'riku-tatuto';
+                    const repo = 'test-blog';
+
+                    // 記事Markdownファイル作成
+                    const markdownContent = `# ${title}\n\n${content}`;
+                    await octokit.request('PUT /repos/{owner}/{repo}/contents/posts/{path}', {
+                        owner,
+                        repo,
+                        path: `${slug}.md`,
+                        message: `Add ${slug} post`,
+                        content: btoa(unescape(encodeURIComponent(markdownContent)))
+                    });
+
+                    // posts.json更新
+                    let posts = [];
+                    try {
+                        const { data } = await octokit.request('GET /repos/{owner}/{repo}/contents/posts.json', {
+                            owner, repo
+                        });
+                        const response = await fetch(data.download_url);
+                        posts = await response.json();
+                    } catch (e) {
+                        console.log('posts.jsonが見つかりません');
+                    }
+
+                    posts.push({
+                        slug, 
+                        title, 
+                        date: new Date().toISOString()
+                    });
+
+                    await octokit.request('PUT /repos/{owner}/{repo}/contents/posts.json', {
+                        owner,
+                        repo,
+                        path: 'posts.json',
+                        message: 'Update posts.json',
+                        content: btoa(unescape(encodeURIComponent(JSON.stringify(posts, null, 2))))
+                    });
+
+                    alert('投稿が完了しました！');
+                    form.reset();
+                } catch (error) {
+                    console.error('エラー:', error);
+                    alert('投稿に失敗しました。GitHubの資格情報を確認してください。');
+                }
+            });
         });
     </script>
 </body>
