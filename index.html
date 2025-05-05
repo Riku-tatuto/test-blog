@@ -3,8 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Test Blog</title>
+    <title>Test Blog - トップページ</title>
     <link rel="stylesheet" href="style.css">
+    
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-database-compat.js"></script>
 </head>
 <body>
     <!-- 固定ナビゲーションバー -->
@@ -25,7 +29,9 @@
     <main class="main-content">
         <div class="container">
             <h2 class="page-title">最新の記事</h2>
-            <div id="posts-container" class="posts-grid"></div>
+            <div id="posts-container" class="posts-grid">
+                <!-- 記事一覧がここに表示されます -->
+            </div>
             <div id="loading" class="loading-message">記事を読み込んでいます...</div>
             <div id="error-message" class="error-message hidden"></div>
         </div>
@@ -44,7 +50,9 @@
         // 記事一覧をGitHubから取得して表示
         fetch('https://raw.githubusercontent.com/riku-tatuto/test-blog/main/posts.json')
             .then(response => {
-                if (!response.ok) throw new Error('記事リストの取得に失敗しました');
+                if (!response.ok) {
+                    throw new Error('記事リストの取得に失敗しました');
+                }
                 return response.json();
             })
             .then(posts => {
