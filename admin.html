@@ -85,7 +85,11 @@
         });
     </script>
 
-    <script>
+    <script type="module">
+        // OctokitとFirebaseの初期化を非同期で実行
+        import { Octokit } from "https://cdn.jsdelivr.net/npm/@octokit/core@4.3.0/dist-esm/index.js";
+        window.Octokit = Octokit;
+    
         // Firebase設定
         const firebaseConfig = {
             apiKey: "AIzaSyACaRzcxYiSnko-L0cemRaT_SYRHjOi8tY",
@@ -97,8 +101,14 @@
             appId: "1:499641724634:web:6da05eb79bea5893aaffe3",
             measurementId: "G-6B5T0TDER9"
         };
-        firebase.initializeApp(firebaseConfig);
-        const database = firebase.database();
+    
+        // Firebase初期化
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.10/firebase-app-compat.js";
+        import { getDatabase } from "https://www.gstatic.com/firebasejs/9.6.10/firebase-database-compat.js";
+    
+        const app = initializeApp(firebaseConfig);
+        const database = getDatabase(app);
+        window.firebase = { app, database };
     </script>
 </body>
 </html>
