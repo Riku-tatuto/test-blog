@@ -3,7 +3,12 @@
 <head>
     <title>Admin - Test Blog</title>
     <link rel="stylesheet" href="style.css">
-    <script src="https://cdn.jsdelivr.net/npm/octokit@2.0.10/build/octokit.min.js"></script>
+
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-database-compat.js"></script>
+
+    <!-- Octokit -->
     <script type="module">
         import { Octokit } from "https://cdn.jsdelivr.net/npm/@octokit/core@4.0.1/dist-esm/index.js";
         window.Octokit = Octokit;
