@@ -5,6 +5,22 @@
     border-bottom: 1px solid #eee;
 }
 
+/* 記事タイトル */
+#post-title {
+    font-size: 2rem;
+    margin-bottom: 0.5rem;
+    color: var(--text-color);
+    display: block;
+    visibility: visible;
+    opacity: 1;
+}
+
+/* コンテンツの両端マージン */
+.post-container-full {
+    padding-left: 2rem;
+    padding-right: 2rem;
+}
+
 .post-header h1 {
     font-size: 2rem;
     margin-bottom: 0.5rem;
@@ -103,4 +119,9 @@
     margin: 0;
     padding: 0;
     font-weight: bold;
+}
+
+/* ナビゲーションバーの左端マージン */
+.navbar .container {
+    padding: 0 2rem;
 }
