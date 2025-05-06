@@ -27,43 +27,50 @@
         </div>
     </div>
 
-    <!-- 記事コンテナ -->
+    <!-- 記事とサイドバーのコンテナ -->
     <main class="post-main">
-        <div class="post-container-full">
-            <div id="post-header" class="post-header">
-                <div class="thumbnail-container">
-                    <div id="post-thumbnail" class="post-thumbnail"></div>
-                </div>
-                <h1 id="post-title">読み込み中...</h1>
-                <div id="post-meta" class="post-meta">
-                    <span id="post-date">日付を読み込み中...</span>
-                </div>
-            </div>
-            
-            <div id="post-content" class="post-content">
-                <!-- 記事が表示される -->
-            </div>
-            
-            <div class="interaction">
-                <button id="likeBtn" class="like-button">👍 いいね</button>
-                <span id="likeCount" class="like-count">0</span>
-                
-                <div class="comments">
-                    <h3 class="comments-title">コメント</h3>
-                    <div class="comment-form">
-                        <input type="text" id="commentAuthor" placeholder="名前" required>
-                        <textarea id="commentInput" placeholder="コメントを入力..."></textarea>
-                        <button id="commentBtn" class="comment-button">送信</button>
+        <div class="container main-container">
+            <!-- 記事コンテンツ -->
+            <div class="post-section">
+                <div class="post-container-full">
+                    <div id="post-header" class="post-header">
+                        <div class="thumbnail-container">
+                            <div id="post-thumbnail" class="post-thumbnail"></div>
+                        </div>
+                        <h1 id="post-title">読み込み中...</h1>
+                        <div id="post-meta" class="post-meta">
+                            <span id="post-date">日付を読み込み中...</span>
+                        </div>
                     </div>
-                    <div id="commentList" class="comment-list"></div>
+                    
+                    <div id="post-content" class="post-content">
+                        <!-- 記事が表示される -->
+                    </div>
+                    
+                    <div class="interaction">
+                        <button id="likeBtn" class="like-button">👍 いいね</button>
+                        <span id="likeCount" class="like-count">0</span>
+                        
+                        <div class="comments">
+                            <h3 class="comments-title">コメント</h3>
+                            <div class="comment-form">
+                                <input type="text" id="commentAuthor" placeholder="名前" required>
+                                <textarea id="commentInput" placeholder="コメントを入力..."></textarea>
+                                <button id="commentBtn" class="comment-button">送信</button>
+                            </div>
+                            <div id="commentList" class="comment-list"></div>
+                        </div>
+                    </div>
                 </div>
             </div>
-        </div>
-        
-        <!-- 新着記事セクション -->
-        <div class="container recent-posts-container">
-            <h2 class="recent-posts-title">新着記事</h2>
-            <div id="recent-posts" class="posts-grid"></div>
+            
+            <!-- 新着記事セクション -->
+            <div class="sidebar">
+                <div class="sidebar-section">
+                    <h2 class="sidebar-title">新着記事</h2>
+                    <div id="recent-posts" class="posts-grid"></div>
+                </div>
+            </div>
         </div>
     </main>
 
@@ -74,39 +81,15 @@
     </footer>
 
     <script>
-        // デバッグメッセージ表示用
-        function debugLog(message) {
-            const debugOutput = document.getElementById('debugOutput') || document.createElement('div');
-            if (!document.getElementById('debugOutput')) {
-                debugOutput.id = 'debugOutput';
-                debugOutput.className = 'debug-output';
-                const container = document.querySelector('.post-main .container');
-                if (container) {
-                    container.appendChild(debugOutput);
-                }
-            }
-            
-            const logEntry = document.createElement('div');
-            logEntry.className = 'debug-entry';
-            logEntry.textContent = `[${new Date().toLocaleTimeString()}] ${message}`;
-            debugOutput.appendChild(logEntry);
-            debugOutput.scrollTop = debugOutput.scrollHeight;
-        }
-    </script>
-
-    <script>
         // URLパラメータからスラグを取得
         const urlParams = new URLSearchParams(window.location.search);
         const slug = urlParams.get('slug');
         
-        debugLog('ページ読み込み開始');
         if (!slug) {
-            debugLog('エラー: スラグが指定されていません');
             document.getElementById('post-content').innerHTML = 
                 '<p>有効な記事URLが指定されていません</p>';
             throw new Error('スラグが指定されていません');
         }
-        debugLog(`スラグ取得完了: ${slug}`);
 
         // Firebase初期化
         const firebaseConfig = {
@@ -123,14 +106,12 @@
         // Firebase初期化
         firebase.initializeApp(firebaseConfig);
         const database = firebase.database();
-        debugLog('Firebase初期化完了');
     </script>
 
     <script>
         // 記事コンテンツをGitHubから取得して表示
         fetch(`https://raw.githubusercontent.com/riku-tatuto/test-blog/main/posts/${slug}.md`)
             .then(response => {
-                debugLog('GitHub記事取得完了');
                 if (!response.ok) {
                     throw new Error('記事の取得に失敗しました');
                 }
@@ -145,23 +126,17 @@
                     const title = firstLine.substring(2).trim();
                     document.getElementById('post-title').textContent = title;
                     document.getElementById('breadcrumb-title').textContent = title;
-                    debugLog(`タイトル取得完了: ${title}`);
                 }
                 
                 // 日付を取得（posts.jsonから）
                 return fetch('https://raw.githubusercontent.com/riku-tatuto/test-blog/main/posts.json');
             })
-            .then(response => {
-                debugLog('posts.json取得完了');
-                return response.json();
-            })
+            .then(response => response.json())
             .then(posts => {
-                debugLog('posts.json解析開始');
                 const post = posts.find(p => p.slug === slug);
                 if (post) {
                     document.getElementById('post-date').textContent = 
                         `公開日: ${new Date(post.date).toLocaleDateString('ja-JP')}`;
-                    debugLog(`記事日付表示完了: ${post.date}`);
                     
                     // サムネイルを表示
                     if (post.thumbnail) {
@@ -169,7 +144,6 @@
                         postThumbnail.style.backgroundImage = `url('${post.thumbnail}')`;
                         postThumbnail.style.backgroundSize = 'cover';
                         postThumbnail.style.backgroundPosition = 'center';
-                        debugLog(`サムネイル表示完了: ${post.thumbnail}`);
                     }
                 }
                 
@@ -180,15 +154,11 @@
                     .slice(0, 5); // 最新の5件だけ表示
                 
                 const recentPostsContainer = document.getElementById('recent-posts');
-                if (!recentPostsContainer) {
-                    debugLog('エラー: recent-posts要素が見つかりません');
-                    return;
-                }
+                if (!recentPostsContainer) return;
                 
                 recentPostsContainer.innerHTML = '';
                 
                 if (recentPosts.length === 0) {
-                    debugLog('関連記事がありません');
                     recentPostsContainer.innerHTML = '<p>関連記事がありません</p>';
                     return;
                 }
@@ -222,34 +192,26 @@
                     card.style.margin = '1rem auto';
                     
                     recentPostsContainer.appendChild(card);
-                    debugLog(`新着記事表示完了: ${post.slug}`);
                 });
             })
             .catch(error => {
-                debugLog(`エラー発生: ${error}`);
                 console.error('エラー:', error);
                 document.getElementById('post-content').innerHTML = 
                     '<p>記事の読み込み中にエラーが発生しました</p>';
             });
-    </script>
 
-    <script>
         // リアルタイムデータベース参照
         const postRef = firebase.database().ref('posts/' + slug);
         const likesRef = firebase.database().ref('posts/' + slug + '/likes');
         const commentsRef = firebase.database().ref('posts/' + slug + '/comments');
-        
-        debugLog(`Firebase参照パス: ${commentsRef.toString()}`);
 
         // いいね機能（リアルタイム更新）
         likesRef.on('value', (snapshot) => {
             const count = snapshot.val() || 0;
             document.getElementById('likeCount').textContent = count;
-            debugLog(`いいね数更新: ${count}`);
         });
 
         document.getElementById('likeBtn').addEventListener('click', () => {
-            debugLog('いいねボタンクリック');
             likesRef.transaction((current) => {
                 return (current || 0) + 1;
             });
@@ -260,10 +222,8 @@
             const text = document.getElementById('commentInput').value;
             const author = document.getElementById('commentAuthor').value;
             
-            debugLog('コメント送信ボタンクリック');
             if (!text.trim()) {
                 alert('コメントを入力してください');
-                debugLog('エラー: コメントが空です');
                 return;
             }
             
@@ -272,34 +232,23 @@
                 timestamp: Date.now(),
                 likes: 0,
                 author: author || '名無しさん'
-            }).then(() => {
-                debugLog('コメント送信完了');
-                document.getElementById('commentInput').value = '';
-                document.getElementById('commentAuthor').value = '';
-            }).catch(error => {
-                debugLog(`エラー: コメント送信失敗 - ${error.message}`);
             });
+            
+            document.getElementById('commentInput').value = '';
+            document.getElementById('commentAuthor').value = '';
         });
 
         // コメントをリアルタイムで取得して表示
         commentsRef.on('value', (snapshot) => {
-            debugLog('Firebaseコメントデータ更新検知');
             const commentList = document.getElementById('commentList');
-            if (!commentList) {
-                debugLog('エラー: commentList要素が見つかりません');
-                return;
-            }
-            
             commentList.innerHTML = '';
             
             if (!snapshot.exists()) {
-                debugLog('コメントがありません');
                 commentList.innerHTML = '<p>コメントはまだありません</p>';
                 return;
             }
             
             const comments = snapshot.val();
-            debugLog(`コメント取得完了: ${Object.keys(comments).length}件`);
             
             // コメントを日時順にソート
             const sortedComments = Object.entries(comments)
@@ -319,44 +268,7 @@
                     <p>${comment.text}</p>
                 `;
                 commentList.appendChild(div);
-                debugLog(`コメント表示完了: ${comment.id}`);
             });
-        });
-
-        // コメントに対するいいね機能
-        document.getElementById('commentList').addEventListener('click', function(e) {
-            if (e.target.classList.contains('like-comment-btn')) {
-                const commentId = e.target.dataset.id;
-                debugLog(`コメントいいねクリック: ${commentId}`);
-                const commentRef = firebase.database().ref('posts/' + slug + '/comments/' + commentId + '/likes');
-                
-                commentRef.transaction(current => {
-                    debugLog(`コメントいいね更新: ${commentId}`);
-                    return (current || 0) + 1;
-                }).catch(error => {
-                    debugLog(`エラー: コメントいいね更新失敗 - ${error.message}`);
-                });
-            }
-        });
-
-        // コメントのいいね数をリアルタイムで更新
-        commentsRef.on('child_changed', (snapshot) => {
-            const comment = snapshot.val();
-            const commentId = snapshot.key;
-            
-            const commentElements = document.querySelectorAll(`[data-id="${commentId}"]`);
-            if (commentElements.length > 0) {
-                const commentElement = commentElements[0];
-                const likeCount = commentElement.querySelector('.comment-like-count');
-                if (likeCount) {
-                    likeCount.textContent = comment.likes || 0;
-                    debugLog(`コメントいいね数更新: ${commentId} - ${comment.likes || 0}`);
-                } else {
-                    debugLog(`エラー: コメントいいね表示要素が見つかりません - ${commentId}`);
-                }
-            } else {
-                debugLog(`エラー: コメント要素が見つかりません - ${commentId}`);
-            }
         });
     </script>
 </body>
