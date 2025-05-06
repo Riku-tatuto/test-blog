@@ -358,6 +358,14 @@ textarea {
     gap: 0.5rem;
 }
 
+.comment-actions {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin: 0;
+    padding: 0;
+}
+
 .like-comment-btn {
     background: var(--secondary-color);
     color: white;
@@ -377,6 +385,7 @@ textarea {
     font-weight: bold;
     min-width: 20px;
     text-align: center;
+    font-size: 0.9rem;
 }
 
 /* メインページ */
@@ -534,11 +543,22 @@ textarea {
     }
 }
 
+.page-title {
+    text-align: center; /* 中央揃え */
+    font-size: 2.5rem; /* 大きく */
+    margin-bottom: 2rem;
+    color: var(--primary-color);
+}
+
 @media (max-width: 960px) {
     .navbar .container {
         flex-direction: column;
         align-items: flex-start;
         gap: 1rem;
+    }
+
+    .posts-grid {
+        grid-template-columns: repeat(3, 1fr); /* 3列固定表示 */
     }
     
     .nav-links {
@@ -666,6 +686,8 @@ textarea {
     position: sticky;
     top: 80px;
     align-self: start;
+    box-shadow: var(--box-shadow); /* シャドウを追加 */
+    border-radius: var(--border-radius); /* 角丸を追加 */
 }
 
 .sidebar-section {
@@ -744,22 +766,20 @@ textarea {
 }
 
 /* レスポンシブ対応 */
-@media (max-width: 960px) {
+@media (min-width: 960px) {
     .main-container {
-        display: block;
+        grid-template-columns: 3.5fr 0.9fr; /* 幅調整を維持 */
     }
     
-    .sidebar {
-        margin-top: 2rem;
+    .recent-posts-grid {
+        grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); /* 2列表示 */
     }
 }
 
 /* 記事とサイドバーのコンテナ */
 .main-container {
-    display: grid;
-    grid-template-columns: 3fr 1fr;
-    gap: 2rem;
-    margin: 1rem auto;
-    padding: 0 1.5rem;
+    grid-template-columns: 3.5fr 0.9fr; /* 記事:サイドバー = 3.5:0.9 */
+    gap: 1.5rem; /* カード間隔を狭く */
+    padding: 0 1.5rem; /* 左右余白を1.5remに */
 }
 
