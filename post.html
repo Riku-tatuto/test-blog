@@ -74,16 +74,12 @@
                     </div>
                     
                     <!-- タブコンテンツ -->
-                    <div id="tab-content-container">
-                        <!-- 新着記事 -->
-                        <div id="recent-posts" class="posts-grid tab-content">
-                            <p class="loading-message">新着記事を読み込んでいます...</p>
-                        </div>
-                        
-                        <!-- 人気記事 -->
-                        <div id="popular-posts" class="posts-grid tab-content hidden">
-                            <p class="loading-message">人気記事を読み込んでいます...</p>
-                        </div>
+                    <div id="recent-posts" class="posts-grid tab-content">
+                        <p class="loading-message">新着記事を読み込んでいます...</p>
+                    </div>
+                    
+                    <div id="popular-posts" class="posts-grid tab-content hidden">
+                        <p class="loading-message">人気記事を読み込んでいます...</p>
                     </div>
                 </div>
             </div>
@@ -163,7 +159,7 @@
                     }
                 }
                 
-                // 関連する記事を表示
+                // 関連記事を表示
                 const allPosts = posts.filter(p => p.slug !== slug);
                 
                 // 新着記事（日付順）
@@ -358,25 +354,27 @@
         // タブ切り替え機能
         document.addEventListener('DOMContentLoaded', function() {
             const tabButtons = document.querySelectorAll('.tab-button');
-            const tabContents = document.querySelectorAll('.tab-content');
             
             tabButtons.forEach(button => {
                 button.addEventListener('click', () => {
-                    // 現在のアクティブ状態を解除
-                    document.querySelector('.tab-button.active')?.classList.remove('active');
+                    // すべてのタブのactiveクラスを削除
+                    document.querySelectorAll('.tab-button.active').forEach(activeButton => {
+                        activeButton.classList.remove('active');
+                    });
                     
-                    // 新しいアクティブ状態を設定
+                    // クリックされたタブにactiveクラスを追加
                     button.classList.add('active');
                     
                     // 対応するコンテンツを表示/非表示
                     const target = button.id.replace('-tab', '-posts');
-                    tabContents.forEach(content => {
-                        if (content.id === target) {
-                            content.classList.remove('hidden');
-                        } else {
-                            content.classList.add('hidden');
-                        }
+                    document.querySelectorAll('.tab-content').forEach(content => {
+                        content.classList.add('hidden');
                     });
+                    
+                    const targetElement = document.getElementById(target);
+                    if (targetElement) {
+                        targetElement.classList.remove('hidden');
+                    }
                 });
             });
         });
