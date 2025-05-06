@@ -23,25 +23,6 @@
     color: var(--primary-color);
 }
 
-.nav-links {
-    display: flex;
-    gap: 1.5rem;
-    list-style: none;
-    margin: 0;
-    padding: 0;
-}
-
-.nav-links li a {
-    color: var(--text-color);
-    text-decoration: none;
-    font-weight: 500;
-    transition: color var(--transition-speed);
-}
-
-.nav-links li a:hover {
-    color: var(--primary-color);
-}
-
 /* パンくずリスト */
 .breadcrumb-container {
     position: relative;
@@ -59,19 +40,4 @@
     border-radius: var(--border-radius);
     margin: 0.5rem 0;
     padding: 0.75rem 1rem;
-}
-
-.breadcrumb a {
-    color: var(--primary-color);
-    text-decoration: none;
-}
-
-.breadcrumb a:hover {
-    text-decoration: underline;
-}
-
-/* コンテンツのマージン（ナビゲーションバー分） */
-.post-main, .main-content {
-    flex: 1;
-    margin-top: 70px;
 }
