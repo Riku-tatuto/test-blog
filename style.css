@@ -698,10 +698,13 @@ textarea {
 .sidebar {
     background: var(--card-background);
     border-left: 1px solid #eee;
-    padding: 1rem 0;
+    padding: 1rem;
     position: sticky;
     top: 80px;
-    align-self: start;
+    /* min-width を削除し、幅はコンテナに合わせる */
+    /* min-width: 280px; */
+    width: 100%;
+    max-width: 300px; /* 任意 */
     border-radius: var(--border-radius);
     box-shadow: var(--box-shadow);
     margin-top: 0;
@@ -724,8 +727,8 @@ textarea {
 .recent-posts-grid {
     display: grid;
     gap: 1rem;
-    grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
-    justify-items: center;
+    /* カードを1列に（サイドバー狭幅では1列で揃うように） */
+    grid-template-columns: 1fr;
     margin-top: 1rem;
 }
 
@@ -736,11 +739,12 @@ textarea {
     cursor: pointer;
     transition: transform var(--transition-speed);
     overflow: hidden;
+    /* 幅はコンテナ幅いっぱい */
+    width: 100%;
+    margin: 0;
     display: flex;
     flex-direction: column;
     justify-content: space-between;
-    width: 100%;
-    margin: 0.75rem auto;
 }
 
 .recent-post-card:hover {
@@ -765,6 +769,16 @@ textarea {
     display: flex;
     flex-direction: column;
     justify-content: center;
+}
+
+.recent-post-card .recent-thumbnail {
+    width: 100%;
+    /* padding-top を削除 */
+    /* padding-top: 56.25%; */
+    aspect-ratio: 16/9;       /* modern かつ fluid */
+    background-size: cover;
+    background-position: center;
+    border-radius: var(--border-radius);
 }
 
 /* 新着記事のタイトル */
