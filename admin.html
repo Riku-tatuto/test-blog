@@ -43,7 +43,7 @@
             measurementId: "G-6B5T0TDER9"
         };
 
-        // ESMなしのFirebase初期化
+        // Firebase初期化
         firebase.initializeApp(firebaseConfig);
         const database = firebase.database();
         
@@ -74,7 +74,16 @@
             
             try {
                 const response = await fetch(url, { headers });
-                if (!response.ok) return null;
+                
+                // 404エラー以外のエラーを処理
+                if (!response.ok) {
+                    if (response.status === 404) {
+                        console.log(`ファイルが見つかりません: ${path}`);
+                        return null;
+                    }
+                    throw new Error(`HTTPエラー: ${response.status} ${response.statusText}`);
+                }
+                
                 const data = await response.json();
                 return data.sha;
             } catch (error) {
@@ -93,7 +102,7 @@
             const content = document.getElementById('content').value;
 
             if (!token || !slug || !title || !content) {
-                alert('必須フィールドをすべて入力してください');
+                alert('すべてのフィールドを入力してください');
                 return;
             }
 
@@ -183,7 +192,7 @@
                         'Authorization': `Bearer ${token}`,
                         'Content-Type': 'application/json'
                     },
-                    body: JSON.stringify(postsFileData)
+                    body: JSON.stringify(postsFileSize)
                 });
 
                 if (!postsPutResponse.ok) {
