@@ -4,7 +4,7 @@
     grid-template-columns: 3fr 1fr;
     gap: 2rem;
     margin: 1rem auto;
-    padding: 0 1rem;
+    padding: 0 1.5rem;
 }
 
 /* 新着記事セクション */
@@ -32,6 +32,8 @@
     font-size: 1.25rem;
     margin-bottom: 1rem;
     color: var(--primary-color);
+    text-align: center;
+    font-weight: bold;
 }
 
 /* 新着記事グリッド */
@@ -53,6 +55,7 @@
     flex-direction: row;
     align-items: center;
     gap: 1rem;
+    padding: 0.5rem;
     border: 1px solid #eee;
 }
 
@@ -72,4 +75,33 @@
     background-repeat: no-repeat;
     background-position: center;
     background-size: contain;
+}
+
+.default-thumbnail {
+    background-image: url('data:image/svg+xml;charset=utf-8,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' width=\'80\' height=\'45\'%3E%3Crect width=\'100%\' height=\'100%\' fill=\'%23ddd\'/%3E%3Ctext x=\'50%\' y=\'50%\' text-anchor=\'middle\' dominant-baseline=\'middle\' fill=\'%23888\' font-size=\'14\' font-family=\'sans-serif\'>No Image</text>%3C/svg%3E') !important;
+}
+
+/* 新着記事カードのコンテンツ */
+.recent-card-content {
+    flex-grow: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+}
+
+/* 新着記事のタイトル */
+.recent-post-title {
+    font-size: 0.9rem;
+    font-weight: bold;
+    margin: 0;
+    padding: 0;
+    color: var(--primary-color);
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: normal;
+    height: 3.2em;
+    line-height: 1.6em;
 }
