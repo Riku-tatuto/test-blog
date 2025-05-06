@@ -22,7 +22,7 @@
     <!-- パンくずリスト -->
     <div class="container breadcrumb-container">
         <div class="breadcrumb">
-            <a href="index.html">ホーム</a> > 
+            <a href="index.html" class="breadcrumb-link">ホーム</a> > 
             <span id="breadcrumb-title">記事読み込み中...</span>
         </div>
     </div>
@@ -64,11 +64,24 @@
                 </div>
             </div>
             
-            <!-- 新着記事セクション -->
+            <!-- タブ付きサイドバー -->
             <div class="sidebar">
                 <div class="sidebar-section">
-                    <h2 class="sidebar-title">新着記事</h2>
+                    <!-- タブメニュー -->
+                    <div class="sidebar-tabs">
+                        <button id="recent-tab" class="tab-button active">
+                            <span class="material-symbols-outlined">new_releases</span> 新着記事
+                        </button>
+                        <button id="popular-tab" class="tab-button">
+                            <span class="material-symbols-outlined">trending_up</span> 人気記事
+                        </button>
+                    </div>
+                    
+                    <!-- 新着記事コンテンツ -->
                     <div id="recent-posts" class="posts-grid"></div>
+                    
+                    <!-- 人気記事コンテンツ -->
+                    <div id="popular-posts" class="posts-grid hidden"></div>
                 </div>
             </div>
         </div>
@@ -153,18 +166,18 @@
                     .sort((a, b) => new Date(b.date) - new Date(a.date))
                     .slice(0, 6); // 最新の6件だけ表示
                 
-                const recentPostsContainer = document.getElementById('recent-posts');
-                if (!recentPostsContainer) return;
+                // 人気記事を表示（いいねが多い順）
+                const popularPosts = [...posts]
+                    .filter(p => p.slug !== slug)
+                    .sort((a, b) => {
+                        const aLikes = a.likes || 0;
+                        const bLikes = b.likes || 0;
+                        return bLikes - aLikes;
+                    })
+                    .slice(0, 6); // いいねが多い順で6件表示
                 
-                recentPostsContainer.innerHTML = '';
-                
-                if (recentPosts.length === 0) {
-                    recentPostsContainer.innerHTML = '<p>関連記事がありません</p>';
-                    return;
-                }
-                
-                // 新着記事をカード形式で表示
-                recentPosts.forEach(post => {
+                // 記事カードを作成する関数
+                function createPostCard(post) {
                     const card = document.createElement('div');
                     card.className = 'post-card';
                     
@@ -191,8 +204,28 @@
                     card.style.maxWidth = '100%';
                     card.style.margin = '1rem auto';
                     
-                    recentPostsContainer.appendChild(card);
-                });
+                    return card;
+                }
+                
+                // 新着記事を表示
+                const recentContainer = document.getElementById('recent-posts');
+                if (recentContainer) {
+                    recentContainer.innerHTML = '';
+                    recentPosts.forEach(post => {
+                        const card = createPostCard(post);
+                        recentContainer.appendChild(card);
+                    });
+                }
+                
+                // 人気記事を表示
+                const popularContainer = document.getElementById('popular-posts');
+                if (popularContainer) {
+                    popularContainer.innerHTML = '';
+                    popularPosts.forEach(post => {
+                        const card = createPostCard(post);
+                        popularContainer.appendChild(card);
+                    });
+                }
             })
             .catch(error => {
                 console.error('エラー:', error);
@@ -306,6 +339,23 @@
                     likeCount.textContent = comment.likes || 0;
                 }
             }
+        });
+    </script>
+
+    <script>
+        // タブ切り替え機能
+        document.querySelectorAll('.tab-button').forEach(button => {
+            button.addEventListener('click', () => {
+                // 現在のアクティブ状態を解除
+                document.querySelector('.tab-button.active').classList.remove('active');
+                button.classList.add('active');
+                
+                // 対応するコンテンツを表示/非表示
+                const target = button.id.replace('-tab', '-posts');
+                document.querySelectorAll('.posts-grid').forEach(grid => {
+                    grid.classList.toggle('hidden', grid.id !== target);
+                });
+            });
         });
     </script>
 </body>
