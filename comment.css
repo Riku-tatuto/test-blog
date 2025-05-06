@@ -1,24 +1,20 @@
-/* いいねボタン */
-.like-button {
-    background: var(--secondary-color);
-    margin-right: 1rem;
-    padding: 0.8rem 2rem;
-    font-weight: bold;
-    border: none;
-    border-radius: var(--border-radius);
-    cursor: pointer;
-    color: white;
-}
-
-.like-button:hover {
-    background: #e53935;
-}
-
-/* コメントセクション */
+/* コメント機能 */
 .comments {
     margin-top: 1.5rem;
+    border-top: 1px solid #eee;
+    padding-top: 1.5rem;
 }
 
+.comments h3 {
+    margin-bottom: 0.5rem;
+    text-align: center;
+    color: var(--primary-color);
+    font-size: 1.5rem;
+    margin-top: 1.5rem;
+    margin-bottom: 1rem;
+}
+
+/* コメントフォーム */
 .comment-form {
     display: flex;
     flex-direction: column;
@@ -31,12 +27,26 @@
     border: 1px solid #ddd;
     border-radius: var(--border-radius);
     font-size: 1rem;
+    width: 100%;
+    font-family: inherit;
+    margin-bottom: 0.5rem;
 }
 
 .comment-form textarea {
     font-family: inherit;
     resize: vertical;
     min-height: 60px;
+    padding: 1rem;
+    margin: 0.5rem 0 1rem;
+    border: 1px solid #ddd;
+    border-radius: var(--border-radius);
+    font-size: 1rem;
+    transition: border-color var(--transition-speed);
+}
+
+.comment-form textarea:focus {
+    border-color: var(--primary-color);
+    outline: none;
 }
 
 .comment-form button {
@@ -49,16 +59,19 @@
     border: none;
     border-radius: var(--border-radius);
     cursor: pointer;
+    transition: background var(--transition-speed);
 }
 
 .comment-form button:hover {
     background: #357abd;
 }
 
+/* コメントリスト */
 .comment-list {
     margin-top: 1rem;
 }
 
+/* 個別コメント */
 .comment {
     background: var(--card-background);
     padding: 1rem;
@@ -66,8 +79,11 @@
     margin: 0.5rem 0;
     border: 1px solid #ddd;
     transition: all var(--transition-speed);
-    visibility: visible;
-    opacity: 1;
+    z-index: 1;
+}
+
+.comment:hover {
+    transform: translateY(-2px);
 }
 
 .comment-header {
