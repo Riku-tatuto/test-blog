@@ -22,7 +22,7 @@
     <!-- パンくずリスト -->
     <div class="container breadcrumb-container">
         <div class="breadcrumb">
-            <a href="index.html">ホーム</a> &gt; 
+            <a href="index.html">ホーム</a> > 
             <span id="breadcrumb-title">記事読み込み中...</span>
         </div>
     </div>
@@ -64,21 +64,11 @@
                 </div>
             </div>
             
-            <!-- サイドバー：タブ切り替えで人気記事／新着記事 -->
+            <!-- 新着記事セクション -->
             <div class="sidebar">
                 <div class="sidebar-section">
-                    <div class="sidebar-tabs">
-                        <button class="tab-item active" data-target="popular-posts">
-                            🏅 人気記事
-                        </button>
-                        <button class="tab-item" data-target="recent-posts">
-                            🆕 新着記事
-                        </button>
-                    </div>
-                    <!-- 人気記事リスト -->
-                    <div id="popular-posts" class="posts-grid tab-content"></div>
-                    <!-- 新着記事リスト -->
-                    <div id="recent-posts" class="posts-grid tab-content"></div>
+                    <h2 class="sidebar-title">新着記事</h2>
+                    <div id="recent-posts" class="posts-grid"></div>
                 </div>
             </div>
         </div>
@@ -112,6 +102,8 @@
             appId: "1:499641724634:web:6da05eb79bea5893aaffe3",
             measurementId: "G-6B5T0TDER9"
         };
+
+        // Firebase初期化
         firebase.initializeApp(firebaseConfig);
         const database = firebase.database();
     </script>
@@ -120,7 +112,9 @@
         // 記事コンテンツをGitHubから取得して表示
         fetch(`https://raw.githubusercontent.com/riku-tatuto/test-blog/main/posts/${slug}.md`)
             .then(response => {
-                if (!response.ok) throw new Error('記事の取得に失敗しました');
+                if (!response.ok) {
+                    throw new Error('記事の取得に失敗しました');
+                }
                 return response.text();
             })
             .then(text => {
@@ -134,150 +128,183 @@
                     document.getElementById('breadcrumb-title').textContent = title;
                 }
                 
-                // posts.json を取得して日付とサムネイル、最近記事を表示
+                // 日付を取得（posts.jsonから）
                 return fetch('https://raw.githubusercontent.com/riku-tatuto/test-blog/main/posts.json');
             })
             .then(response => response.json())
             .then(posts => {
-                // 公開日とサムネイル
-                const postMeta = posts.find(p => p.slug === slug);
-                if (postMeta) {
-                    document.getElementById('post-date').textContent =
-                        `公開日: ${new Date(postMeta.date).toLocaleDateString('ja-JP')}`;
-                    if (postMeta.thumbnail) {
+                const post = posts.find(p => p.slug === slug);
+                if (post) {
+                    document.getElementById('post-date').textContent = 
+                        `公開日: ${new Date(post.date).toLocaleDateString('ja-JP')}`;
+                    
+                    // サムネイルを表示
+                    if (post.thumbnail) {
                         const postThumbnail = document.getElementById('post-thumbnail');
-                        postThumbnail.style.backgroundImage = `url('${postMeta.thumbnail}')`;
+                        postThumbnail.style.backgroundImage = `url('${post.thumbnail}')`;
                         postThumbnail.style.backgroundSize = 'cover';
                         postThumbnail.style.backgroundPosition = 'center';
                     }
                 }
-
-                // 新着記事を表示（tab-content #recent-posts）
+                
+                // 新着記事を表示
                 const recentPosts = posts
                     .filter(p => p.slug !== slug)
                     .sort((a, b) => new Date(b.date) - new Date(a.date))
-                    .slice(0, 6);
-                const recentContainer = document.getElementById('recent-posts');
-                recentContainer.innerHTML = '';
-                recentPosts.forEach(p => {
+                    .slice(0, 6); // 最新の6件だけ表示
+                
+                const recentPostsContainer = document.getElementById('recent-posts');
+                if (!recentPostsContainer) return;
+                
+                recentPostsContainer.innerHTML = '';
+                
+                if (recentPosts.length === 0) {
+                    recentPostsContainer.innerHTML = '<p>関連記事がありません</p>';
+                    return;
+                }
+                
+                // 新着記事をカード形式で表示
+                recentPosts.forEach(post => {
                     const card = document.createElement('div');
                     card.className = 'post-card';
-                    const thumbHTML = p.thumbnail
-                        ? `<div class="post-thumbnail" style="background-image: url('${p.thumbnail}')"></div>`
-                        : `<div class="post-thumbnail default-thumbnail"></div>`;
+                    
+                    // サムネイル部分を構築
+                    const thumbnailHTML = post.thumbnail ? 
+                        `<div class="post-thumbnail" style="background-image: url('${post.thumbnail}')"></div>` : 
+                        `<div class="post-thumbnail default-thumbnail"></div>`;
+                    
+                    // カードの内容を構築
                     card.innerHTML = `
-                        ${thumbHTML}
+                        ${thumbnailHTML}
                         <div class="post-card-content">
-                            <h2 class="post-title">${p.title}</h2>
-                        </div>`;
+                            <h2 class="post-title">${post.title}</h2>
+                        </div>
+                    `;
+                    
+                    // クリックイベント追加
                     card.addEventListener('click', () => {
-                        window.location.href = `post.html?slug=${p.slug}`;
+                        window.location.href = `post.html?slug=${post.slug}`;
                     });
-                    recentContainer.appendChild(card);
+                    
+                    card.style.cursor = 'pointer';
+                    card.style.width = '100%';
+                    card.style.maxWidth = '100%';
+                    card.style.margin = '1rem auto';
+                    
+                    recentPostsContainer.appendChild(card);
                 });
             })
             .catch(error => {
                 console.error('エラー:', error);
-                document.getElementById('post-content').innerHTML =
+                document.getElementById('post-content').innerHTML = 
                     '<p>記事の読み込み中にエラーが発生しました</p>';
             });
     </script>
 
     <script>
-        // --- タブ切り替え処理 ---
-        document.querySelectorAll('.sidebar-tabs .tab-item').forEach(btn => {
-            btn.addEventListener('click', () => {
-                document.querySelectorAll('.sidebar-tabs .tab-item').forEach(b => b.classList.remove('active'));
-                btn.classList.add('active');
-                document.querySelectorAll('.tab-content').forEach(tab => tab.style.display = 'none');
-                const target = document.getElementById(btn.dataset.target);
-                // popular-posts は grid、recent-posts は grid
-                target.style.display = 'grid';
+        // リアルタイムデータベース参照
+        const postRef = firebase.database().ref('posts/' + slug);
+        const likesRef = firebase.database().ref('posts/' + slug + '/likes');
+        const commentsRef = firebase.database().ref('posts/' + slug + '/comments');
+
+        // いいね機能（リアルタイム更新）
+        likesRef.on('value', (snapshot) => {
+            const count = snapshot.val() || 0;
+            document.getElementById('likeCount').textContent = count;
+        });
+
+        document.getElementById('likeBtn').addEventListener('click', () => {
+            likesRef.transaction((current) => {
+                return (current || 0) + 1;
             });
         });
 
-        // --- 人気記事の取得と表示 ---
-        fetch('https://raw.githubusercontent.com/riku-tatuto/test-blog/main/posts.json')
-            .then(res => res.json())
-            .then(posts => {
-                const popularContainer = document.getElementById('popular-posts');
-                const popularPosts = posts
-                    .filter(p => p.slug !== slug)
-                    .sort((a, b) => {
-                        // Firebase likes を使う場合: return (b.likes || 0) - (a.likes || 0);
-                        return new Date(b.date) - new Date(a.date);
-                    })
-                    .slice(0, 6);
-                popularPosts.forEach(p => {
-                    const card = document.createElement('div');
-                    card.className = 'post-card';
-                    const thumbHTML = p.thumbnail
-                        ? `<div class="post-thumbnail" style="background-image: url('${p.thumbnail}')"></div>`
-                        : `<div class="post-thumbnail default-thumbnail"></div>`;
-                    card.innerHTML = `
-                        ${thumbHTML}
-                        <div class="post-card-content">
-                            <h2 class="post-title">${p.title}</h2>
-                        </div>`;
-                    card.addEventListener('click', () => {
-                        window.location.href = `post.html?slug=${p.slug}`;
-                    });
-                    popularContainer.appendChild(card);
-                });
-            })
-            .catch(console.error);
-    </script>
-
-    <script>
-        // いいね機能（リアルタイム更新）
-        const likesRef = firebase.database().ref('posts/' + slug + '/likes');
-        likesRef.on('value', snap => {
-            document.getElementById('likeCount').textContent = snap.val() || 0;
-        });
-        document.getElementById('likeBtn').addEventListener('click', () => {
-            likesRef.transaction(cur => (cur || 0) + 1);
-        });
-
-        // コメント機能
-        const commentsRef = firebase.database().ref('posts/' + slug + '/comments');
+        // コメント機能（リアルタイム更新）
         document.getElementById('commentBtn').addEventListener('click', () => {
             const text = document.getElementById('commentInput').value;
-            const author = document.getElementById('commentAuthor').value || '名無しさん';
-            if (!text.trim()) return alert('コメントを入力してください');
-            commentsRef.push({ text, timestamp: Date.now(), likes: 0, author });
+            const author = document.getElementById('commentAuthor').value;
+            
+            if (!text.trim()) {
+                alert('コメントを入力してください');
+                return;
+            }
+            
+            commentsRef.push({
+                text,
+                timestamp: Date.now(),
+                likes: 0,
+                author: author || '名無しさん'
+            });
+            
             document.getElementById('commentInput').value = '';
             document.getElementById('commentAuthor').value = '';
         });
-        commentsRef.on('value', snap => {
-            const list = document.getElementById('commentList');
-            list.innerHTML = '';
-            if (!snap.exists()) return list.innerHTML = '<p>コメントはまだありません</p>';
-            Object.entries(snap.val())
-                .sort(([, a], [, b]) => b.timestamp - a.timestamp)
-                .forEach(([id, c]) => {
-                    const div = document.createElement('div');
-                    div.className = 'comment';
-                    div.dataset.id = id;
-                    div.innerHTML = `
-                        <div class="comment-header">
-                            <span class="comment-author">${c.author}</span>
-                            <small class="comment-time">${new Date(c.timestamp).toLocaleString('ja-JP')}</small>
+
+        // コメントをリアルタイムで取得して表示
+        commentsRef.on('value', (snapshot) => {
+            const commentList = document.getElementById('commentList');
+            commentList.innerHTML = '';
+            
+            if (!snapshot.exists()) {
+                commentList.innerHTML = '<p>コメントはまだありません</p>';
+                return;
+            }
+            
+            const comments = snapshot.val();
+            
+            // コメントを日時順にソート
+            const sortedComments = Object.entries(comments)
+                .map(([key, value]) => ({ id: key, ...value }))
+                .sort((a, b) => b.timestamp - a.timestamp);
+            
+            // コメント要素を作成
+            sortedComments.forEach(comment => {
+                const div = document.createElement('div');
+                div.className = 'comment';
+                div.setAttribute('data-id', comment.id);
+                div.innerHTML = `
+                    <div class="comment-header">
+                        <span class="comment-author">${comment.author}</span>
+                        <small class="comment-time">${new Date(comment.timestamp).toLocaleString('ja-JP')}</small>
+                    </div>
+                    <p>${comment.text}</p>
+                    <div class="comment-footer">
+                        <div class="comment-actions">
+                            <button class="like-comment-btn" data-id="${comment.id}">👍</button>
+                            <span class="comment-like-count">${comment.likes || 0}</span>
                         </div>
-                        <p>${c.text}</p>
-                        <div class="comment-footer">
-                            <div class="comment-actions">
-                                <button class="like-comment-btn" data-id="${id}">👍</button>
-                                <span class="comment-like-count">${c.likes||0}</span>
-                            </div>
-                        </div>`;
-                    list.appendChild(div);
-                });
+                    </div>
+                `;
+                commentList.appendChild(div);
+            });
         });
-        document.getElementById('commentList').addEventListener('click', e => {
+
+        // コメントに対するいいね機能
+        document.getElementById('commentList').addEventListener('click', function(e) {
             if (e.target.classList.contains('like-comment-btn')) {
-                const id = e.target.dataset.id;
-                const likeRef = firebase.database().ref(`posts/${slug}/comments/${id}/likes`);
-                likeRef.transaction(cur => (cur||0)+1);
+                const commentId = e.target.dataset.id;
+                const commentRef = firebase.database().ref('posts/' + slug + '/comments/' + commentId + '/likes');
+                
+                commentRef.transaction(current => {
+                    return (current || 0) + 1;
+                }).catch(error => {
+                    console.error('コメントいいね更新エラー:', error);
+                });
+            }
+        });
+
+        // コメントのいいね数をリアルタイムで更新
+        commentsRef.on('child_changed', (snapshot) => {
+            const comment = snapshot.val();
+            const commentId = snapshot.key;
+            
+            const commentElements = document.querySelectorAll(`[data-id="${commentId}"]`);
+            if (commentElements.length > 0) {
+                const commentElement = commentElements[0];
+                const likeCount = commentElement.querySelector('.comment-like-count');
+                if (likeCount) {
+                    likeCount.textContent = comment.likes || 0;
+                }
             }
         });
     </script>
