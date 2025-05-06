@@ -22,7 +22,7 @@
     <!-- パンくずリスト -->
     <div class="container breadcrumb-container">
         <div class="breadcrumb">
-            <a href="index.html">ホーム</a> > 
+            <a href="index.html" class="breadcrumb-link">ホーム</a> > 
             <span id="breadcrumb-title">記事読み込み中...</span>
         </div>
     </div>
@@ -69,15 +69,22 @@
                 <div class="sidebar-section">
                     <!-- タブメニュー -->
                     <div class="sidebar-tabs">
-                        <button id="popular-tab" class="tab-button active">人気記事</button>
-                        <button id="recent-tab" class="tab-button">新着記事</button>
+                        <button id="recent-tab" class="tab-button active">新着記事</button>
+                        <button id="popular-tab" class="tab-button">人気記事</button>
                     </div>
                     
-                    <!-- 新着記事コンテンツ -->
-                    <div id="recent-posts" class="posts-grid"></div>
-                    
-                    <!-- 人気記事コンテンツ -->
-                    <div id="popular-posts" class="posts-grid hidden"></div>
+                    <!-- タブコンテンツ -->
+                    <div id="tab-content-container">
+                        <!-- 新着記事 -->
+                        <div id="recent-posts" class="tab-content">
+                            <p class="loading-message">新着記事を読み込んでいます...</p>
+                        </div>
+                        
+                        <!-- 人気記事 -->
+                        <div id="popular-posts" class="tab-content hidden">
+                            <p class="loading-message">人気記事を読み込んでいます...</p>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -156,15 +163,16 @@
                     }
                 }
                 
-                // 新着記事を表示
-                const recentPosts = posts
-                    .filter(p => p.slug !== slug)
+                // 全ての関連記事を表示
+                const allPosts = posts.filter(p => p.slug !== slug);
+                
+                // 新着記事（日付順）
+                const recentPosts = allPosts
                     .sort((a, b) => new Date(b.date) - new Date(a.date))
                     .slice(0, 6); // 最新の6件だけ表示
                 
-                // 人気記事を表示（いいねが多い順）
-                const popularPosts = [...posts]
-                    .filter(p => p.slug !== slug)
+                // 人気記事（いいね数順）
+                const popularPosts = [...allPosts]
                     .sort((a, b) => {
                         const aLikes = a.likes || 0;
                         const bLikes = b.likes || 0;
@@ -197,7 +205,7 @@
                     
                     card.style.cursor = 'pointer';
                     card.style.width = '100%';
-                    card.style.maxWidth = '100%';
+                    card.style.max-width = '100%';
                     card.style.margin = '1rem auto';
                     
                     return card;
@@ -207,20 +215,28 @@
                 const recentContainer = document.getElementById('recent-posts');
                 if (recentContainer) {
                     recentContainer.innerHTML = '';
-                    recentPosts.forEach(post => {
-                        const card = createPostCard(post);
-                        recentContainer.appendChild(card);
-                    });
+                    if (recentPosts.length === 0) {
+                        recentContainer.innerHTML = '<p>関連記事がありません</p>';
+                    } else {
+                        recentPosts.forEach(post => {
+                            const card = createPostCard(post);
+                            recentContainer.appendChild(card);
+                        });
+                    }
                 }
                 
                 // 人気記事を表示
                 const popularContainer = document.getElementById('popular-posts');
                 if (popularContainer) {
                     popularContainer.innerHTML = '';
-                    popularPosts.forEach(post => {
-                        const card = createPostCard(post);
-                        popularContainer.appendChild(card);
-                    });
+                    if (popularPosts.length === 0) {
+                        popularContainer.innerHTML = '<p>関連記事がありません</p>';
+                    } else {
+                        popularPosts.forEach(post => {
+                            const card = createPostCard(post);
+                            popularContainer.appendChild(card);
+                        });
+                    }
                 }
             })
             .catch(error => {
@@ -348,7 +364,7 @@
                 
                 // 対応するコンテンツを表示/非表示
                 const target = button.id.replace('-tab', '-posts');
-                document.querySelectorAll('.posts-grid').forEach(grid => {
+                document.querySelectorAll('.tab-content').forEach(grid => {
                     grid.classList.toggle('hidden', grid.id !== target);
                 });
             });
