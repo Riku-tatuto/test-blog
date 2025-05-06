@@ -3,8 +3,13 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Test Blog - トップページ</title>
+    <title>Test Blog - 投稿</title>
     <link rel="stylesheet" href="style.css">
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-database-compat.js"></script>
 </head>
 <body>
     <!-- 固定ナビゲーションバー -->
@@ -17,20 +22,55 @@
     <!-- パンくずリスト -->
     <div class="container breadcrumb-container">
         <div class="breadcrumb">
-            <a href="index.html">ホーム</a>
+            <a href="index.html">ホーム</a> > 
+            <span id="breadcrumb-title">記事読み込み中...</span>
         </div>
     </div>
 
-    <!-- メインコンテンツ -->
-    <main class="main-content">
-        <div class="container">
-            <h2 class="page-title">新着記事</h2>
-            <div id="posts-container" class="posts-grid"></div>
-            <!-- 人気記事セクション -->
-            <h2 class="page-title">人気記事</h2>
-            <div id="popular-posts" class="posts-grid"></div>
-            <div id="loading" class="loading-message">記事を読み込んでいます...</div>
-            <div id="error-message" class="error-message hidden"></div>
+    <!-- 記事とサイドバーのコンテナ -->
+    <main class="post-main">
+        <div class="container main-container">
+            <!-- 記事コンテンツ -->
+            <div class="post-section">
+                <div class="post-container-full">
+                    <div id="post-header" class="post-header">
+                        <div class="thumbnail-container">
+                            <div id="post-thumbnail" class="post-thumbnail"></div>
+                        </div>
+                        <h1 id="post-title">読み込み中...</h1>
+                        <div id="post-meta" class="post-meta">
+                            <span id="post-date">日付を読み込み中...</span>
+                        </div>
+                    </div>
+                    
+                    <div id="post-content" class="post-content">
+                        <!-- 記事が表示される -->
+                    </div>
+                    
+                    <div class="interaction">
+                        <button id="likeBtn" class="like-button">👍 いいね</button>
+                        <span id="likeCount" class="like-count">0</span>
+                        
+                        <div class="comments">
+                            <h3 class="comments-title">コメント</h3>
+                            <div class="comment-form">
+                                <input type="text" id="commentAuthor" placeholder="名前" required>
+                                <textarea id="commentInput" placeholder="コメントを入力..."></textarea>
+                                <button id="commentBtn" class="comment-button">送信</button>
+                            </div>
+                            <div id="commentList" class="comment-list"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- 新着記事セクション -->
+            <div class="sidebar">
+                <div class="sidebar-section">
+                    <h2 class="sidebar-title">新着記事</h2>
+                    <div id="recent-posts" class="posts-grid"></div>
+                </div>
+            </div>
         </div>
     </main>
 
@@ -41,76 +81,232 @@
     </footer>
 
     <script>
-        // 記事一覧をGitHubから取得して表示
-        fetch('https://raw.githubusercontent.com/riku-tatuto/test-blog/main/posts.json')
+        // URLパラメータからスラグを取得
+        const urlParams = new URLSearchParams(window.location.search);
+        const slug = urlParams.get('slug');
+        
+        if (!slug) {
+            document.getElementById('post-content').innerHTML = 
+                '<p>有効な記事URLが指定されていません</p>';
+            throw new Error('スラグが指定されていません');
+        }
+
+        // Firebase初期化
+        const firebaseConfig = {
+            apiKey: "AIzaSyACaRzcxYiSnko-L0cemRaT_SYRHjOi8tY",
+            authDomain: "online-chat-5daf8.firebaseapp.com",
+            databaseURL: "https://online-chat-5daf8-default-rtdb.firebaseio.com",
+            projectId: "online-chat-5daf8",
+            storageBucket: "online-chat-5daf8.firebasestorage.app",
+            messagingSenderId: "499641724634",
+            appId: "1:499641724634:web:6da05eb79bea5893aaffe3",
+            measurementId: "G-6B5T0TDER9"
+        };
+
+        // Firebase初期化
+        firebase.initializeApp(firebaseConfig);
+        const database = firebase.database();
+    </script>
+
+    <script>
+        // 記事コンテンツをGitHubから取得して表示
+        fetch(`https://raw.githubusercontent.com/riku-tatuto/test-blog/main/posts/${slug}.md`)
             .then(response => {
                 if (!response.ok) {
-                    throw new Error('記事リストの取得に失敗しました');
+                    throw new Error('記事の取得に失敗しました');
                 }
-                return response.json();
+                return response.text();
             })
+            .then(text => {
+                document.getElementById('post-content').innerHTML = marked.parse(text);
+                
+                // タイトルを抽出して表示
+                const firstLine = text.split('\n')[0];
+                if (firstLine.startsWith('# ')) {
+                    const title = firstLine.substring(2).trim();
+                    document.getElementById('post-title').textContent = title;
+                    document.getElementById('breadcrumb-title').textContent = title;
+                }
+                
+                // 日付を取得（posts.jsonから）
+                return fetch('https://raw.githubusercontent.com/riku-tatuto/test-blog/main/posts.json');
+            })
+            .then(response => response.json())
             .then(posts => {
-                const container = document.getElementById('posts-container');
-                const loading = document.getElementById('loading');
-                const errorMessage = document.getElementById('error-message');
+                const post = posts.find(p => p.slug === slug);
+                if (post) {
+                    document.getElementById('post-date').textContent = 
+                        `公開日: ${new Date(post.date).toLocaleDateString('ja-JP')}`;
+                    
+                    // サムネイルを表示
+                    if (post.thumbnail) {
+                        const postThumbnail = document.getElementById('post-thumbnail');
+                        postThumbnail.style.backgroundImage = `url('${post.thumbnail}')`;
+                        postThumbnail.style.backgroundSize = 'cover';
+                        postThumbnail.style.backgroundPosition = 'center';
+                    }
+                }
                 
-                // ローディングメッセージを非表示
-                loading.classList.add('hidden');
+                // 新着記事を表示
+                const recentPosts = posts
+                    .filter(p => p.slug !== slug)
+                    .sort((a, b) => new Date(b.date) - new Date(a.date))
+                    .slice(0, 6); // 最新の6件だけ表示
                 
-                if (!container) return;
+                const recentPostsContainer = document.getElementById('recent-posts');
+                if (!recentPostsContainer) return;
                 
-                if (posts.length === 0) {
-                    container.innerHTML = '<p>記事がありません</p>';
+                recentPostsContainer.innerHTML = '';
+                
+                if (recentPosts.length === 0) {
+                    recentPostsContainer.innerHTML = '<p>関連記事がありません</p>';
                     return;
                 }
-
-                // 投稿日時の新しい順にソート
-                posts.sort((a, b) => new Date(b.date) - new Date(a.date))
-                    .forEach(post => {
-                        const card = document.createElement('div');
-                        card.className = 'post-card';
-                        
-                        // サムネイル部分を構築
-                        const thumbnailHTML = post.thumbnail ? 
-                            `<div class="post-thumbnail" style="background-image: url('${post.thumbnail}')"></div>` : 
-                            `<div class="post-thumbnail default-thumbnail"></div>`;
-                        
-                        // カードの内容を構築
-                        card.innerHTML = `
-                            ${thumbnailHTML}
-                            <div class="post-card-content">
-                                <h2 class="post-title">${post.title}</h2>
-                            </div>
-                        `;
-                        
-                        // クリックイベント追加
-                        card.addEventListener('click', () => {
-                            window.location.href = `post.html?slug=${post.slug}`;
-                        });
-                        
-                        card.style.cursor = 'pointer';
-                        
-                        container.appendChild(card);
+                
+                // 新着記事をカード形式で表示
+                recentPosts.forEach(post => {
+                    const card = document.createElement('div');
+                    card.className = 'post-card';
+                    
+                    // サムネイル部分を構築
+                    const thumbnailHTML = post.thumbnail ? 
+                        `<div class="post-thumbnail" style="background-image: url('${post.thumbnail}')"></div>` : 
+                        `<div class="post-thumbnail default-thumbnail"></div>`;
+                    
+                    // カードの内容を構築
+                    card.innerHTML = `
+                        ${thumbnailHTML}
+                        <div class="post-card-content">
+                            <h2 class="post-title">${post.title}</h2>
+                        </div>
+                    `;
+                    
+                    // クリックイベント追加
+                    card.addEventListener('click', () => {
+                        window.location.href = `post.html?slug=${post.slug}`;
                     });
+                    
+                    card.style.cursor = 'pointer';
+                    card.style.width = '100%';
+                    card.style.maxWidth = '100%';
+                    card.style.margin = '1rem auto';
+                    
+                    recentPostsContainer.appendChild(card);
+                });
             })
             .catch(error => {
                 console.error('エラー:', error);
-                const container = document.getElementById('posts-container');
-                const loading = document.getElementById('loading');
-                const errorMessage = document.getElementById('error-message');
-                
-                // 不要な要素を非表示
-                container.style.display = 'none';
-                loading.classList.add('hidden');
-                
-                // エラーメッセージを表示
-                errorMessage.classList.remove('hidden');
-                errorMessage.innerHTML = `
-                    <h3>エラーが発生しました</h3>
-                    <p>記事の読み込み中に問題が発生しました。</p>
-                    <button onclick="location.reload()" class="retry-button">再読み込み</button>
-                `;
+                document.getElementById('post-content').innerHTML = 
+                    '<p>記事の読み込み中にエラーが発生しました</p>';
             });
+    </script>
+
+    <script>
+        // リアルタイムデータベース参照
+        const postRef = firebase.database().ref('posts/' + slug);
+        const likesRef = firebase.database().ref('posts/' + slug + '/likes');
+        const commentsRef = firebase.database().ref('posts/' + slug + '/comments');
+
+        // いいね機能（リアルタイム更新）
+        likesRef.on('value', (snapshot) => {
+            const count = snapshot.val() || 0;
+            document.getElementById('likeCount').textContent = count;
+        });
+
+        document.getElementById('likeBtn').addEventListener('click', () => {
+            likesRef.transaction((current) => {
+                return (current || 0) + 1;
+            });
+        });
+
+        // コメント機能（リアルタイム更新）
+        document.getElementById('commentBtn').addEventListener('click', () => {
+            const text = document.getElementById('commentInput').value;
+            const author = document.getElementById('commentAuthor').value;
+            
+            if (!text.trim()) {
+                alert('コメントを入力してください');
+                return;
+            }
+            
+            commentsRef.push({
+                text,
+                timestamp: Date.now(),
+                likes: 0,
+                author: author || '名無しさん'
+            });
+            
+            document.getElementById('commentInput').value = '';
+            document.getElementById('commentAuthor').value = '';
+        });
+
+        // コメントをリアルタイムで取得して表示
+        commentsRef.on('value', (snapshot) => {
+            const commentList = document.getElementById('commentList');
+            commentList.innerHTML = '';
+            
+            if (!snapshot.exists()) {
+                commentList.innerHTML = '<p>コメントはまだありません</p>';
+                return;
+            }
+            
+            const comments = snapshot.val();
+            
+            // コメントを日時順にソート
+            const sortedComments = Object.entries(comments)
+                .map(([key, value]) => ({ id: key, ...value }))
+                .sort((a, b) => b.timestamp - a.timestamp);
+            
+            // コメント要素を作成
+            sortedComments.forEach(comment => {
+                const div = document.createElement('div');
+                div.className = 'comment';
+                div.setAttribute('data-id', comment.id);
+                div.innerHTML = `
+                    <div class="comment-header">
+                        <span class="comment-author">${comment.author}</span>
+                        <small class="comment-time">${new Date(comment.timestamp).toLocaleString('ja-JP')}</small>
+                    </div>
+                    <p>${comment.text}</p>
+                    <div class="comment-footer">
+                        <div class="comment-actions">
+                            <button class="like-comment-btn" data-id="${comment.id}">👍</button>
+                            <span class="comment-like-count">${comment.likes || 0}</span>
+                        </div>
+                    </div>
+                `;
+                commentList.appendChild(div);
+            });
+        });
+
+        // コメントに対するいいね機能
+        document.getElementById('commentList').addEventListener('click', function(e) {
+            if (e.target.classList.contains('like-comment-btn')) {
+                const commentId = e.target.dataset.id;
+                const commentRef = firebase.database().ref('posts/' + slug + '/comments/' + commentId + '/likes');
+                
+                commentRef.transaction(current => {
+                    return (current || 0) + 1;
+                }).catch(error => {
+                    console.error('コメントいいね更新エラー:', error);
+                });
+            }
+        });
+
+        // コメントのいいね数をリアルタイムで更新
+        commentsRef.on('child_changed', (snapshot) => {
+            const comment = snapshot.val();
+            const commentId = snapshot.key;
+            
+            const commentElements = document.querySelectorAll(`[data-id="${commentId}"]`);
+            if (commentElements.length > 0) {
+                const commentElement = commentElements[0];
+                const likeCount = commentElement.querySelector('.comment-like-count');
+                if (likeCount) {
+                    likeCount.textContent = comment.likes || 0;
+                }
+            }
+        });
     </script>
 </body>
 </html>
