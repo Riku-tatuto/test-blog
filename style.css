@@ -719,8 +719,9 @@ textarea {
     flex-direction: row;
     align-items: center;
     gap: 1rem;
-    border: 1px solid #eee;
     padding: 0.5rem;
+    border: 1px solid #eee;
+    height: 120px; /* カードの高さを固定 */
 }
 
 .recent-post-card:hover {
@@ -728,8 +729,8 @@ textarea {
 }
 
 .recent-thumbnail {
-    width: 80px;
-    height: 45px;
+    width: 200px; /* 幅を固定 */
+    height: 112.5px; /* 16:9 アスペクト比（200x112.5） */
     background-size: cover;
     background-position: center;
     border-radius: var(--border-radius);
@@ -745,11 +746,12 @@ textarea {
     display: flex;
     flex-direction: column;
     justify-content: center;
+    min-width: 0; /* テキストオーバーフロー対策 */
 }
 
 /* 新着記事のタイトル */
 .recent-post-title {
-    font-size: 0.9rem;
+    font-size: 1rem;
     font-weight: bold;
     color: var(--primary-color);
     display: -webkit-box;
@@ -758,8 +760,8 @@ textarea {
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: normal;
-    height: 3.2em;
-    line-height: 1.6em;
+    line-height: 1.4em;
+    height: 2.8em;
 }
 
 /* レスポンシブ対応 */
