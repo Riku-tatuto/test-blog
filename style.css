@@ -541,8 +541,8 @@ textarea {
 }
 
 .page-title {
-    text-align: center;
-    font-size: 2.5rem;
+    text-align: center; /* 中央揃え */
+    font-size: 2.5rem; /* 大きく */
     margin-bottom: 2rem;
     color: var(--primary-color);
 }
@@ -654,84 +654,12 @@ textarea {
     font-weight: bold;
 }
 
-.section-subtitle {
-    text-align: center;
-    font-size: 1.25rem;
-    color: var(--text-color);
-    margin-bottom: 0.5rem;
-}
-
-.popular-posts {
-    margin-top: 3rem;
-}
-
-.popular-post-card {
-    background: var(--card-background);
-    border-radius: var(--border-radius);
-    box-shadow: var(--box-shadow);
-    cursor: pointer;
-    transition: transform var(--transition-speed);
-    overflow: hidden;
-    display: flex;
-    flex-direction: column;
-    margin: 1rem auto;
-    width: 403px;
-    height: 340px;
-}
-
-.popular-post-card:hover {
-    transform: translateY(-5px);
-}
-
-.popular-rank {
-    position: absolute;
-    top: 1rem;
-    right: 1rem;
-    background: var(--secondary-color);
-    color: white;
-    border-radius: 50%;
-    width: 30px;
-    height: 30px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-weight: bold;
-    z-index: 2;
-}
-
-.popular-rank-label {
-    position: absolute;
-    top: 1rem;
-    right: 1rem;
-    background: var(--secondary-color);
-    color: white;
-    border-radius: var(--border-radius);
-    padding: 0.2rem 0.5rem;
-    font-size: 0.85rem;
-    font-weight: bold;
-    z-index: 2;
-}
-
 .posts-grid {
     display: grid;
     gap: 1.5rem;
-    margin-top: 2rem;
-    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    margin-top: 1rem;
+    grid-template-columns: repeat(auto-fill, minmax(403px, 1fr));
     justify-items: center;
-}
-
-/* ホーム記事グリッド（960px以上） */
-@media (min-width: 960px) {
-    .posts-grid {
-        grid-template-columns: repeat(3, 1fr); /* 3列表示 */
-    }
-}
-
-/* ホーム記事グリッド（768px以上） */
-@media (min-width: 768px) and (max-width: 959px) {
-    .posts-grid {
-        grid-template-columns: repeat(2, 1fr); /* 2列表示 */
-    }
 }
 
 /* 記事ページのヘッダー */
