@@ -64,23 +64,16 @@
                 </div>
             </div>
             
-            <!-- タブ付きサイドバー -->
+            <!-- サイドバー -->
             <div class="sidebar">
                 <div class="sidebar-section">
-                    <!-- タブメニュー -->
-                    <div class="sidebar-tabs">
-                        <button id="recent-tab" class="tab-button active">新着記事</button>
-                        <button id="popular-tab" class="tab-button">人気記事</button>
-                    </div>
-                    
-                    <!-- タブコンテンツ -->
-                    <div id="recent-posts" class="posts-grid tab-content">
-                        <p class="loading-message">新着記事を読み込んでいます...</p>
-                    </div>
-                    
-                    <div id="popular-posts" class="posts-grid tab-content hidden">
-                        <p class="loading-message">人気記事を読み込んでいます...</p>
-                    </div>
+                    <h2 class="sidebar-title">新着記事</h2>
+                    <div id="recent-posts" class="posts-grid"></div>
+                </div>
+                
+                <div class="sidebar-section">
+                    <h2 class="sidebar-title">人気記事</h2>
+                    <div id="popular-posts" class="posts-grid"></div>
                 </div>
             </div>
         </div>
@@ -159,7 +152,7 @@
                     }
                 }
                 
-                // 関連記事を表示
+                // 関連する記事を表示
                 const allPosts = posts.filter(p => p.slug !== slug);
                 
                 // 新着記事（日付順）
@@ -347,36 +340,6 @@
                     likeCount.textContent = comment.likes || 0;
                 }
             }
-        });
-    </script>
-
-    <script>
-        // タブ切り替え機能
-        document.addEventListener('DOMContentLoaded', function() {
-            const tabButtons = document.querySelectorAll('.tab-button');
-            
-            tabButtons.forEach(button => {
-                button.addEventListener('click', () => {
-                    // すべてのタブのactiveクラスを削除
-                    document.querySelectorAll('.tab-button.active').forEach(activeButton => {
-                        activeButton.classList.remove('active');
-                    });
-                    
-                    // クリックされたタブにactiveクラスを追加
-                    button.classList.add('active');
-                    
-                    // 対応するコンテンツを表示/非表示
-                    const target = button.id.replace('-tab', '-posts');
-                    document.querySelectorAll('.tab-content').forEach(content => {
-                        content.classList.add('hidden');
-                    });
-                    
-                    const targetElement = document.getElementById(target);
-                    if (targetElement) {
-                        targetElement.classList.remove('hidden');
-                    }
-                });
-            });
         });
     </script>
 </body>
