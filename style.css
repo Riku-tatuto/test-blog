@@ -677,14 +677,12 @@ textarea {
 
 /* 新着記事セクション */
 .sidebar {
-    background: var(--card-background);
-    border-left: 1px solid #eee;
-    padding: 1rem 0;
     position: sticky;
     top: 80px;
     align-self: start;
-    border-radius: var(--border-radius); /* 角丸を追加 */
-    box-shadow: var(--box-shadow); /* シャドウを追加 */
+    overflow-y: auto;
+    max-height: calc(100vh - 80px);
+    padding: 1rem 0;
 }
 
 .sidebar-section {
@@ -694,7 +692,7 @@ textarea {
 
 .sidebar h2.sidebar-title {
     font-size: 1.25rem;
-    margin-bottom: 1rem;
+    margin-bottom: 0.5rem;
     color: var(--primary-color);
     text-align: center;
     font-weight: bold;
@@ -711,11 +709,15 @@ textarea {
 
 .recent-post-card {
     background: var(--card-background);
-    border-radius: var(--border-radius); /* 角丸を追加 */
-    box-shadow: var(--box-shadow); /* シャドウを追加 */
+    border-radius: var(--border-radius);
+    box-shadow: var(--box-shadow);
+    cursor: pointer;
+    transition: transform var(--transition-speed);
     overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
     width: 100%;
-    max-width: 100%;
     margin: 0.75rem auto;
 }
 
@@ -724,12 +726,12 @@ textarea {
 }
 
 .recent-thumbnail {
-    width: 80px;
-    height: 45px;
+    width: 100%;
+    height: 0;
+    padding-top: 56.25%; /* 16:9 アスペクト比 */
     background-size: cover;
     background-position: center;
     border-radius: var(--border-radius);
-    flex-shrink: 0;
 }
 
 .default-thumbnail {
@@ -767,8 +769,9 @@ textarea {
     
     .recent-posts-grid {
         display: grid;
-        grid-template-columns: repeat(2, 1fr); /* 2列固定表示 */
-        gap: 1.5rem; /* カード間隔を統一 */
+        grid-template-columns: repeat(2, 1fr);
+        gap: 1.5rem;
+        margin-top: 1rem;
     }
 }
 
