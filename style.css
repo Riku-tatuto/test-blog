@@ -407,11 +407,11 @@ textarea {
     cursor: pointer;
     transition: transform var(--transition-speed);
     overflow: hidden;
-    width: 403px;
-    height: 340px;
-    display: flex;
+    width: 100%; /* 固定幅解除 */
+    max-width: 403px; /* 最大幅で画面収まり */
+    margin: 0.75rem auto; /* 中央寄せ */
     flex-direction: column;
-    margin: 1rem;
+    justify-content: space-between;
     position: relative;
 }
 
@@ -566,6 +566,15 @@ textarea {
     .post-container-full {
         padding: 1.5rem;
     }
+
+    .recent-posts-grid {
+        grid-template-columns: repeat(2, 1fr); /* 常に2列 */
+        gap: 1.5rem; /* 統一された間隔 */
+    }
+    
+    .post-card {
+        margin: 0.75rem auto; /* カード間隔調整 */
+    }
 }
 
 /* サムネイル共通スタイル */
@@ -578,6 +587,16 @@ textarea {
     margin-bottom: 1rem;
     background-color: #e0e0e0;
     background-image: url('data:image/svg+xml;charset=utf-8,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' width='403' height='226'%3E%3Crect width='100%' height='100%' fill='%23ddd'/%3E%3Ctext x='50%' y='50%' text-anchor='middle' dominant-baseline='middle' fill='%23888' font-size='24' font-family='sans-serif'>No Image</text>%3C/svg%3E');
+}
+
+.post-thumbnail,
+.recent-thumbnail {
+    width: 100%;
+    height: 0;
+    padding-top: 56.25%; /* 16:9 アスペクト比 */
+    background-size: cover;
+    background-position: center;
+    border-radius: var(--border-radius);
 }
 
 .default-thumbnail {
@@ -677,12 +696,16 @@ textarea {
 
 /* 新着記事セクション */
 .sidebar {
+    background: var(--card-background);
+    border-left: 1px solid #eee;
+    padding: 1rem 0;
     position: sticky;
     top: 80px;
     align-self: start;
-    overflow-y: auto;
-    max-height: calc(100vh - 80px);
-    padding: 1rem 0;
+    border-radius: var(--border-radius);
+    box-shadow: var(--box-shadow);
+    margin-top: 0;
+    min-width: 280px; /* 最小幅でレイアウト維持 */
 }
 
 .sidebar-section {
@@ -702,7 +725,7 @@ textarea {
 .recent-posts-grid {
     display: grid;
     gap: 1rem;
-    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); /* 自動調整 */
+    grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
     justify-items: center;
     margin-top: 1rem;
 }
@@ -784,3 +807,9 @@ textarea {
     padding: 0 1.5rem;
 }
 
+@media (max-width: 959px) {
+    .main-container {
+        grid-template-columns: 1fr; /* サイドバーを下に */
+        padding: 0 1rem; /* 余白調整 */
+    }
+}
