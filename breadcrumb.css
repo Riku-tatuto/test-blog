@@ -1,0 +1,28 @@
+/* パンくずリスト */
+.breadcrumb-container {
+    position: relative;
+    z-index: 1;
+    margin-top: 0.5rem;
+    background: var(--background-color);
+}
+
+.breadcrumb {
+    font-size: 0.95rem;
+    color: #666;
+    padding: 0.5rem 0;
+    border-bottom: 1px solid #ddd;
+    background: #f8f9fa;
+    border-radius: var(--border-radius);
+    margin: 0.5rem 0;
+    padding: 0.75rem 1rem;
+}
+
+.breadcrumb a {
+    color: var(--primary-color);
+    text-decoration: none;
+    font-weight: bold;
+}
+
+.breadcrumb a:hover {
+    text-decoration: underline;
+}
