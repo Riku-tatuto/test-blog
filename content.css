@@ -1,3 +1,9 @@
+/* コンテンツのマージン（ナビゲーションバー分） */
+.post-main, .main-content {
+    flex: 1;
+    margin-top: 70px;
+}
+
 /* コンテンツコンテナ */
 .post-container-full {
     max-width: 100%;
@@ -43,23 +49,4 @@
     font-size: 1.1rem;
     text-align: center;
     margin: 2rem 0;
-}
-
-.error-message h3 {
-    margin-bottom: 1rem;
-}
-
-.retry-button {
-    background: var(--secondary-color);
-    color: white;
-    border: none;
-    padding: 0.5rem 1rem;
-    border-radius: var(--border-radius);
-    cursor: pointer;
-    font-weight: bold;
-    transition: background var(--transition-speed);
-}
-
-.retry-button:hover {
-    background: #e53935;
 }
