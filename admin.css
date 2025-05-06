@@ -15,8 +15,18 @@
 }
 
 /* フォーム要素 */
-input, 
-textarea {
+.form-group {
+    margin-bottom: 1.5rem;
+}
+
+.form-label {
+    display: block;
+    margin-bottom: 0.5rem;
+    font-weight: 500;
+}
+
+.form-input,
+.form-textarea {
     width: 100%;
     padding: 1rem;
     margin: 0.5rem 0 1rem;
@@ -27,13 +37,19 @@ textarea {
     transition: border-color var(--transition-speed);
 }
 
-input:focus, 
-textarea:focus {
+.form-input:focus,
+.form-textarea:focus {
     border-color: var(--primary-color);
     outline: none;
 }
 
-button {
+.form-textarea {
+    height: 300px;
+    resize: vertical;
+    font-family: monospace;
+}
+
+.submit-button {
     padding: 0.8rem 2rem;
     background: var(--primary-color);
     color: white;
@@ -45,12 +61,6 @@ button {
     transition: background var(--transition-speed);
 }
 
-button:hover {
+.submit-button:hover {
     background: #357abd;
-}
-
-textarea {
-    height: 300px;
-    resize: vertical;
-    font-family: monospace;
 }
