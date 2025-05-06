@@ -721,7 +721,7 @@ textarea {
     gap: 1rem;
     padding: 0.5rem;
     border: 1px solid #eee;
-    height: 120px; /* カードの高さを固定 */
+    aspect-ratio: 16 / 9;
 }
 
 .recent-post-card:hover {
@@ -767,8 +767,9 @@ textarea {
 /* レスポンシブ対応 */
 @media (min-width: 960px) {
     .main-container {
-        grid-template-columns: 3.5fr 0.9fr; /* 幅調整を維持 */
-        display: block; /* モバイルでは縦に表示 */
+        /* 旧: 3.5fr 0.9fr; */
+        /* 新: 本文を少し狭くして新着記事を大きめに */
+        grid-template-columns: 2.8fr 1.2fr; /* 本文70%：新着記事30%程度 */
     }
     
     .recent-posts-grid {
