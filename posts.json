@@ -20,5 +20,11 @@
     "title": "テスト記事五番目",
     "date": "2025-05-06T00:47:07.748Z",
     "thumbnail": "https://www.s-hoshino.com/wall/natu/001/001_1600_1200.jpg"
+  },
+  {
+    "slug": "test6",
+    "title": "テスト記事6",
+    "date": "2025-05-06T01:07:06.059Z",
+    "thumbnail": "https://photo-chips.com/user_data/00014783_bb3bdd.jpg"
   }
 ]
