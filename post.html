@@ -4,12 +4,15 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Test Blog - 投稿</title>
-    <link rel="stylesheet" href="style.css">
-    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    <link rel="stylesheet" href="base.css">
+    <link rel="stylesheet" href="navbar.css">
+    <link rel="stylesheet" href="content.css">
+    <link rel="stylesheet" href="post.css">
+    <link rel="stylesheet" href="comment.css">
+    <link rel="stylesheet" href="sidebar.css">
+    <link rel="stylesheet" href="responsive.css">
     
-    <!-- Firebase SDK -->
-    <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-database-compat.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
 </head>
 <body>
     <!-- 固定ナビゲーションバー -->
@@ -146,52 +149,9 @@
                         postThumbnail.style.backgroundPosition = 'center';
                     }
                 }
-                
-                // 新着記事を表示
-                const recentPosts = posts
-                    .filter(p => p.slug !== slug)
-                    .sort((a, b) => new Date(b.date) - new Date(a.date))
-                    .slice(0, 5); // 最新の5件だけ表示
-                
-                const recentPostsContainer = document.getElementById('recent-posts');
-                if (!recentPostsContainer) return;
-                
-                recentPostsContainer.innerHTML = '';
-                
-                if (recentPosts.length === 0) {
-                    recentPostsContainer.innerHTML = '<p>関連記事がありません</p>';
-                    return;
-                }
-                
-                recentPosts.forEach(post => {
-                    const card = document.createElement('div');
-                    card.className = 'recent-post-card';
-                    
-                    // サムネイル部分を構築
-                    const thumbnailHTML = post.thumbnail ? 
-                        `<div class="recent-thumbnail" style="background-image: url('${post.thumbnail}')"></div>` : 
-                        `<div class="recent-thumbnail default-thumbnail"></div>`;
-                    
-                    // カードの内容を構築
-                    card.innerHTML = `
-                        ${thumbnailHTML}
-                        <div class="recent-card-content">
-                            <h3 class="recent-post-title">${post.title}</h3>
-                        </div>
-                    `;
-                    
-                    // クリックイベント追加
-                    card.addEventListener('click', () => {
-                        window.location.href = `post.html?slug=${post.slug}`;
-                    });
-                    
-                    card.style.cursor = 'pointer';
-                    
-                    recentPostsContainer.appendChild(card);
-                });
             })
             .catch(error => {
-                console.error('エラー:', error);
+                console.error('posts.json取得エラー:', error);
                 document.getElementById('post-content').innerHTML = 
                     '<p>記事の読み込み中にエラーが発生しました</p>';
             });
