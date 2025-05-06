@@ -3,13 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Test Blog - 投稿</title>
+    <title>Test Blog - トップページ</title>
     <link rel="stylesheet" href="style.css">
-    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
-    
-    <!-- Firebase SDK -->
-    <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-database-compat.js"></script>
 </head>
 <body>
     <!-- 固定ナビゲーションバー -->
@@ -22,65 +17,20 @@
     <!-- パンくずリスト -->
     <div class="container breadcrumb-container">
         <div class="breadcrumb">
-            <a href="index.html">ホーム</a> &gt; 
-            <span id="breadcrumb-title">記事読み込み中...</span>
+            <a href="index.html">ホーム</a>
         </div>
     </div>
 
-    <!-- 記事とサイドバーのコンテナ -->
-    <main class="post-main">
-        <div class="container main-container">
-            <!-- 記事コンテンツ -->
-            <div class="post-section">
-                <div class="post-container-full">
-                    <div id="post-header" class="post-header">
-                        <div class="thumbnail-container">
-                            <div id="post-thumbnail" class="post-thumbnail"></div>
-                        </div>
-                        <h1 id="post-title">読み込み中...</h1>
-                        <div id="post-meta" class="post-meta">
-                            <span id="post-date">日付を読み込み中...</span>
-                        </div>
-                    </div>
-                    
-                    <div id="post-content" class="post-content">
-                        <!-- 記事が表示される -->
-                    </div>
-                    
-                    <div class="interaction">
-                        <button id="likeBtn" class="like-button">👍 いいね</button>
-                        <span id="likeCount" class="like-count">0</span>
-                        
-                        <div class="comments">
-                            <h3 class="comments-title">コメント</h3>
-                            <div class="comment-form">
-                                <input type="text" id="commentAuthor" placeholder="名前" required>
-                                <textarea id="commentInput" placeholder="コメントを入力..."></textarea>
-                                <button id="commentBtn" class="comment-button">送信</button>
-                            </div>
-                            <div id="commentList" class="comment-list"></div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            
-            <!-- サイドバー：タブ切り替えで人気記事／新着記事 -->
-            <div class="sidebar">
-                <div class="sidebar-section">
-                    <div class="sidebar-tabs">
-                        <button class="tab-item active" data-target="popular-posts">
-                            🏅 人気記事
-                        </button>
-                        <button class="tab-item" data-target="recent-posts">
-                            🆕 新着記事
-                        </button>
-                    </div>
-                    <!-- 人気記事リスト -->
-                    <div id="popular-posts" class="posts-grid tab-content"></div>
-                    <!-- 新着記事リスト -->
-                    <div id="recent-posts" class="posts-grid tab-content"></div>
-                </div>
-            </div>
+    <!-- メインコンテンツ -->
+    <main class="main-content">
+        <div class="container">
+            <h2 class="page-title">新着記事</h2>
+            <div id="posts-container" class="posts-grid"></div>
+            <!-- 人気記事セクション -->
+            <h2 class="page-title">人気記事</h2>
+            <div id="popular-posts" class="posts-grid"></div>
+            <div id="loading" class="loading-message">記事を読み込んでいます...</div>
+            <div id="error-message" class="error-message hidden"></div>
         </div>
     </main>
 
@@ -91,189 +41,76 @@
     </footer>
 
     <script>
-        // URLパラメータからスラグを取得
-        const urlParams = new URLSearchParams(window.location.search);
-        const slug = urlParams.get('slug');
-        
-        if (!slug) {
-            document.getElementById('post-content').innerHTML = 
-                '<p>有効な記事URLが指定されていません</p>';
-            throw new Error('スラグが指定されていません');
-        }
-
-        // Firebase初期化
-        const firebaseConfig = {
-            apiKey: "AIzaSyACaRzcxYiSnko-L0cemRaT_SYRHjOi8tY",
-            authDomain: "online-chat-5daf8.firebaseapp.com",
-            databaseURL: "https://online-chat-5daf8-default-rtdb.firebaseio.com",
-            projectId: "online-chat-5daf8",
-            storageBucket: "online-chat-5daf8.firebasestorage.app",
-            messagingSenderId: "499641724634",
-            appId: "1:499641724634:web:6da05eb79bea5893aaffe3",
-            measurementId: "G-6B5T0TDER9"
-        };
-        firebase.initializeApp(firebaseConfig);
-        const database = firebase.database();
-    </script>
-
-    <script>
-        // 記事コンテンツをGitHubから取得して表示
-        fetch(`https://raw.githubusercontent.com/riku-tatuto/test-blog/main/posts/${slug}.md`)
+        // 記事一覧をGitHubから取得して表示
+        fetch('https://raw.githubusercontent.com/riku-tatuto/test-blog/main/posts.json')
             .then(response => {
-                if (!response.ok) throw new Error('記事の取得に失敗しました');
-                return response.text();
-            })
-            .then(text => {
-                document.getElementById('post-content').innerHTML = marked.parse(text);
-                
-                // タイトルを抽出して表示
-                const firstLine = text.split('\n')[0];
-                if (firstLine.startsWith('# ')) {
-                    const title = firstLine.substring(2).trim();
-                    document.getElementById('post-title').textContent = title;
-                    document.getElementById('breadcrumb-title').textContent = title;
+                if (!response.ok) {
+                    throw new Error('記事リストの取得に失敗しました');
                 }
-                
-                // posts.json を取得して日付とサムネイル、記事リストを表示
-                return fetch('https://raw.githubusercontent.com/riku-tatuto/test-blog/main/posts.json');
+                return response.json();
             })
-            .then(response => response.json())
             .then(posts => {
-                // 公開日とサムネイル
-                const postMeta = posts.find(p => p.slug === slug);
-                if (postMeta) {
-                    document.getElementById('post-date').textContent =
-                        `公開日: ${new Date(postMeta.date).toLocaleDateString('ja-JP')}`;
-                    if (postMeta.thumbnail) {
-                        const postThumbnail = document.getElementById('post-thumbnail');
-                        postThumbnail.style.backgroundImage = `url('${postMeta.thumbnail}')`;
-                        postThumbnail.style.backgroundSize = 'cover';
-                        postThumbnail.style.backgroundPosition = 'center';
-                    }
+                const container = document.getElementById('posts-container');
+                const loading = document.getElementById('loading');
+                const errorMessage = document.getElementById('error-message');
+                
+                // ローディングメッセージを非表示
+                loading.classList.add('hidden');
+                
+                if (!container) return;
+                
+                if (posts.length === 0) {
+                    container.innerHTML = '<p>記事がありません</p>';
+                    return;
                 }
 
-                // 新着記事を表示
-                const recentPosts = posts
-                    .filter(p => p.slug !== slug)
-                    .sort((a, b) => new Date(b.date) - new Date(a.date))
-                    .slice(0, 6);
-                const recentContainer = document.getElementById('recent-posts');
-                recentContainer.innerHTML = '';
-                recentPosts.forEach(p => {
-                    const card = document.createElement('div');
-                    card.className = 'post-card';
-                    const thumbHTML = p.thumbnail
-                        ? `<div class="post-thumbnail" style="background-image: url('${p.thumbnail}')"></div>`
-                        : `<div class="post-thumbnail default-thumbnail"></div>`;
-                    card.innerHTML = `
-                        ${thumbHTML}
-                        <div class="post-card-content">
-                            <h2 class="post-title">${p.title}</h2>
-                        </div>`;
-                    card.addEventListener('click', () => {
-                        window.location.href = `post.html?slug=${p.slug}`;
+                // 投稿日時の新しい順にソート
+                posts.sort((a, b) => new Date(b.date) - new Date(a.date))
+                    .forEach(post => {
+                        const card = document.createElement('div');
+                        card.className = 'post-card';
+                        
+                        // サムネイル部分を構築
+                        const thumbnailHTML = post.thumbnail ? 
+                            `<div class="post-thumbnail" style="background-image: url('${post.thumbnail}')"></div>` : 
+                            `<div class="post-thumbnail default-thumbnail"></div>`;
+                        
+                        // カードの内容を構築
+                        card.innerHTML = `
+                            ${thumbnailHTML}
+                            <div class="post-card-content">
+                                <h2 class="post-title">${post.title}</h2>
+                            </div>
+                        `;
+                        
+                        // クリックイベント追加
+                        card.addEventListener('click', () => {
+                            window.location.href = `post.html?slug=${post.slug}`;
+                        });
+                        
+                        card.style.cursor = 'pointer';
+                        
+                        container.appendChild(card);
                     });
-                    recentContainer.appendChild(card);
-                });
-
-                // 人気記事を表示
-                const popularPosts = posts
-                    .filter(p => p.slug !== slug)
-                    .sort((a, b) => new Date(b.date) - new Date(a.date))
-                    .slice(0, 6);
-                const popularContainer = document.getElementById('popular-posts');
-                popularPosts.forEach(p => {
-                    const card = document.createElement('div');
-                    card.className = 'post-card';
-                    const thumbHTML = p.thumbnail
-                        ? `<div class="post-thumbnail" style="background-image: url('${p.thumbnail}')"></div>`
-                        : `<div class="post-thumbnail default-thumbnail"></div>`;
-                    card.innerHTML = `
-                        ${thumbHTML}
-                        <div class="post-card-content">
-                            <h2 class="post-title">${p.title}</h2>
-                        </div>`;
-                    card.addEventListener('click', () => {
-                        window.location.href = `post.html?slug=${p.slug}`;
-                    });
-                    popularContainer.appendChild(card);
-                });
-
-                // 初期タブ切り替え
-                document.querySelector('.sidebar-tabs .tab-item.active').click();
             })
             .catch(error => {
                 console.error('エラー:', error);
-                document.getElementById('post-content').innerHTML =
-                    '<p>記事の読み込み中にエラーが発生しました</p>';
+                const container = document.getElementById('posts-container');
+                const loading = document.getElementById('loading');
+                const errorMessage = document.getElementById('error-message');
+                
+                // 不要な要素を非表示
+                container.style.display = 'none';
+                loading.classList.add('hidden');
+                
+                // エラーメッセージを表示
+                errorMessage.classList.remove('hidden');
+                errorMessage.innerHTML = `
+                    <h3>エラーが発生しました</h3>
+                    <p>記事の読み込み中に問題が発生しました。</p>
+                    <button onclick="location.reload()" class="retry-button">再読み込み</button>
+                `;
             });
-    </script>
-
-    <script>
-        // --- タブ切り替え処理 ---
-        document.querySelectorAll('.sidebar-tabs .tab-item').forEach(btn => {
-            btn.addEventListener('click', () => {
-                document.querySelectorAll('.sidebar-tabs .tab-item').forEach(b => b.classList.remove('active'));
-                btn.classList.add('active');
-                document.querySelectorAll('.tab-content').forEach(tab => tab.style.display = 'none');
-                const target = document.getElementById(btn.dataset.target);
-                target.style.display = 'grid';
-            });
-        });
-    </script>
-
-    <script>
-        // いいね機能
-        const likesRef = firebase.database().ref('posts/' + slug + '/likes');
-        likesRef.on('value', snap => {
-            document.getElementById('likeCount').textContent = snap.val() || 0;
-        });
-        document.getElementById('likeBtn').addEventListener('click', () => {
-            likesRef.transaction(cur => (cur || 0) + 1);
-        });
-
-        // コメント機能
-        const commentsRef = firebase.database().ref('posts/' + slug + '/comments');
-        document.getElementById('commentBtn').addEventListener('click', () => {
-            const text = document.getElementById('commentInput').value;
-            const author = document.getElementById('commentAuthor').value || '名無しさん';
-            if (!text.trim()) return alert('コメントを入力してください');
-            commentsRef.push({ text, timestamp: Date.now(), likes: 0, author });
-            document.getElementById('commentInput').value = '';
-            document.getElementById('commentAuthor').value = '';
-        });
-        commentsRef.on('value', snap => {
-            const list = document.getElementById('commentList');
-            list.innerHTML = '';
-            if (!snap.exists()) return list.innerHTML = '<p>コメントはまだありません</p>';
-            Object.entries(snap.val())
-                .sort(([, a], [, b]) => b.timestamp - a.timestamp)
-                .forEach(([id, c]) => {
-                    const div = document.createElement('div');
-                    div.className = 'comment';
-                    div.dataset.id = id;
-                    div.innerHTML = `
-                        <div class="comment-header">
-                            <span class="comment-author">${c.author}</span>
-                            <small class="comment-time">${new Date(c.timestamp).toLocaleString('ja-JP')}</small>
-                        </div>
-                        <p>${c.text}</p>
-                        <div class="comment-footer">
-                            <div class="comment-actions">
-                                <button class="like-comment-btn" data-id="${id}">👍</button>
-                                <span class="comment-like-count">${c.likes||0}</span>
-                            </div>
-                        </div>`;
-                    list.appendChild(div);
-                });
-        });
-        document.getElementById('commentList').addEventListener('click', e => {
-            if (e.target.classList.contains('like-comment-btn')) {
-                const id = e.target.dataset.id;
-                const likeRef = firebase.database().ref(`posts/${slug}/comments/${id}/likes`);
-                likeRef.transaction(cur => (cur||0)+1);
-            }
-        });
     </script>
 </body>
 </html>
