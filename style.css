@@ -705,7 +705,6 @@ textarea {
     border-radius: var(--border-radius);
     box-shadow: var(--box-shadow);
     margin-top: 0;
-    min-width: 280px; /* 最小幅でレイアウト維持 */
 }
 
 .sidebar-section {
