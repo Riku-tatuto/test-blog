@@ -686,8 +686,8 @@ textarea {
     position: sticky;
     top: 80px;
     align-self: start;
-    box-shadow: var(--box-shadow); /* シャドウを追加 */
     border-radius: var(--border-radius); /* 角丸を追加 */
+    box-shadow: var(--box-shadow); /* シャドウを追加 */
 }
 
 .sidebar-section {
@@ -769,6 +769,7 @@ textarea {
 @media (min-width: 960px) {
     .main-container {
         grid-template-columns: 3.5fr 0.9fr; /* 幅調整を維持 */
+        display: block; /* モバイルでは縦に表示 */
     }
     
     .recent-posts-grid {
@@ -778,8 +779,10 @@ textarea {
 
 /* 記事とサイドバーのコンテナ */
 .main-container {
+    display: grid;
     grid-template-columns: 3.5fr 0.9fr; /* 記事:サイドバー = 3.5:0.9 */
     gap: 1.5rem; /* カード間隔を狭く */
-    padding: 0 1.5rem; /* 左右余白を1.5remに */
+    margin: 1rem auto;
+    padding: 0 1.5rem;
 }
 
