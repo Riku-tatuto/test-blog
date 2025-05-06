@@ -6,14 +6,12 @@
     background: var(--card-background);
     border-radius: var(--border-radius);
     box-shadow: var(--box-shadow);
-    position: relative;
 }
 
 .admin-container h1 {
     margin-bottom: 1.5rem;
     text-align: center;
     color: var(--primary-color);
-    font-size: 2rem;
 }
 
 /* フォーム要素 */
@@ -25,7 +23,6 @@
     display: block;
     margin-bottom: 0.5rem;
     font-weight: 500;
-    font-size: 1rem;
 }
 
 .form-input,
