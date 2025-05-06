@@ -22,7 +22,7 @@
     <!-- パンくずリスト -->
     <div class="container breadcrumb-container">
         <div class="breadcrumb">
-            <a href="index.html" class="breadcrumb-link">ホーム</a> > 
+            <a href="index.html">ホーム</a> > 
             <span id="breadcrumb-title">記事読み込み中...</span>
         </div>
     </div>
@@ -151,7 +151,7 @@
                 const recentPosts = posts
                     .filter(p => p.slug !== slug)
                     .sort((a, b) => new Date(b.date) - new Date(a.date))
-                    .slice(0, 5); // 最新の5件だけ表示
+                    .slice(0, 6); // 最新の6件だけ表示
                 
                 const recentPostsContainer = document.getElementById('recent-posts');
                 if (!recentPostsContainer) return;
@@ -199,7 +199,9 @@
                 document.getElementById('post-content').innerHTML = 
                     '<p>記事の読み込み中にエラーが発生しました</p>';
             });
+    </script>
 
+    <script>
         // リアルタイムデータベース参照
         const postRef = firebase.database().ref('posts/' + slug);
         const likesRef = firebase.database().ref('posts/' + slug + '/likes');
@@ -266,9 +268,44 @@
                         <small class="comment-time">${new Date(comment.timestamp).toLocaleString('ja-JP')}</small>
                     </div>
                     <p>${comment.text}</p>
+                    <div class="comment-footer">
+                        <div class="comment-actions">
+                            <button class="like-comment-btn" data-id="${comment.id}">👍</button>
+                            <span class="comment-like-count">${comment.likes || 0}</span>
+                        </div>
+                    </div>
                 `;
                 commentList.appendChild(div);
             });
+        });
+
+        // コメントに対するいいね機能
+        document.getElementById('commentList').addEventListener('click', function(e) {
+            if (e.target.classList.contains('like-comment-btn')) {
+                const commentId = e.target.dataset.id;
+                const commentRef = firebase.database().ref('posts/' + slug + '/comments/' + commentId + '/likes');
+                
+                commentRef.transaction(current => {
+                    return (current || 0) + 1;
+                }).catch(error => {
+                    console.error('コメントいいね更新エラー:', error);
+                });
+            }
+        });
+
+        // コメントのいいね数をリアルタイムで更新
+        commentsRef.on('child_changed', (snapshot) => {
+            const comment = snapshot.val();
+            const commentId = snapshot.key;
+            
+            const commentElements = document.querySelectorAll(`[data-id="${commentId}"]`);
+            if (commentElements.length > 0) {
+                const commentElement = commentElements[0];
+                const likeCount = commentElement.querySelector('.comment-like-count');
+                if (likeCount) {
+                    likeCount.textContent = comment.likes || 0;
+                }
+            }
         });
     </script>
 </body>
