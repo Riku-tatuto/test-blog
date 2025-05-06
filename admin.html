@@ -123,7 +123,8 @@
                         console.log(`ファイルが見つかりません: ${path}`);
                         return null;
                     }
-                    throw new Error(`HTTPエラー: ${response.status} ${response.statusText}`);
+                    const errorData = await response.json();
+                    throw new Error(`GitHub APIエラー: ${errorData.message}`);
                 }
                 
                 const data = await response.json();
@@ -194,7 +195,7 @@
                 // 投稿日時をISO形式で追加
                 const now = new Date().toISOString();
                 
-                // サムネイル付きで保存
+                // 投稿日時の新しい順にソート
                 const postIndex = posts.findIndex(p => p.slug === slug);
                 
                 if (postIndex > -1) {
