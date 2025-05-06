@@ -284,24 +284,33 @@ textarea {
     margin-bottom: 1rem;
 }
 
-.comment-form input {
+.comment-form input[type="text"],
+.comment-form textarea,
+.comment-form button {
+    width: 100%;
+    font-family: inherit;
+    font-size: 1rem;
+    border-radius: var(--border-radius);
     padding: 0.5rem;
     border: 1px solid #ddd;
-    border-radius: var(--border-radius);
-    font-size: 1rem;
+    transition: border-color var(--transition-speed);
+}
+
+.comment-form input[type="text"]:focus,
+.comment-form textarea:focus {
+    border-color: var(--primary-color);
+    outline: none;
 }
 
 .comment-form textarea {
-    font-family: inherit;
     resize: vertical;
     min-height: 60px;
-}
-
-.comment-form button {
-    width: auto;
-    padding: 0.7rem 1.5rem;
-    align-self: flex-start;
-    font-weight: bold;
+    padding: 1rem;
+    margin: 0.5rem 0 1rem;
+    font-size: 1rem;
+    border: 1px solid #ddd;
+    border-radius: var(--border-radius);
+    transition: border-color var(--transition-speed);
 }
 
 .comment-list {
@@ -379,8 +388,10 @@ textarea {
 .posts-grid {
     display: grid;
     gap: 1.5rem;
-    margin-top: 2rem;
+    margin-top: 1rem;
     grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    justify-items: center;
+    padding: 0 1.5rem;
 }
 
 .post-card {
@@ -651,11 +662,10 @@ textarea {
 .sidebar {
     background: var(--card-background);
     border-left: 1px solid #eee;
-    padding-left: 1.5rem;
+    padding: 1rem 0;
     position: sticky;
     top: 80px;
     align-self: start;
-    padding: 1rem 0;
 }
 
 .sidebar-section {
@@ -663,11 +673,13 @@ textarea {
     border-bottom: 1px solid #eee;
 }
 
-.sidebar h2 {
+.sidebar h2.sidebar-title {
     font-size: 1.25rem;
     margin-bottom: 1rem;
     color: var(--primary-color);
     text-align: center;
+    font-weight: bold;
+    padding: 0 1.5rem;
 }
 
 .recent-posts-grid {
