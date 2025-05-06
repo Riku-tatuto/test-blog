@@ -605,19 +605,6 @@ textarea {
 
 /* 記事一覧カードスタイル */
 .post-card {
-    background: var(--card-background);
-    border-radius: var(--border-radius);
-    box-shadow: var(--box-shadow);
-    cursor: pointer;
-    transition: transform var(--transition-speed);
-    overflow: hidden;
-    width: 403px;
-    height: 340px;
-    display: flex;
-    flex-direction: column;
-    justify-content: space-between;
-    margin: 1rem;
-    position: relative;
 }
 
 .post-card:hover {
