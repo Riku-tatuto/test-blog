@@ -59,6 +59,12 @@
                 </div>
             </div>
         </div>
+        
+        <!-- 新着記事セクション -->
+        <div class="container recent-posts-container">
+            <h2 class="recent-posts-title">新着記事</h2>
+            <div id="recent-posts" class="posts-grid"></div>
+        </div>
     </main>
 
     <footer class="site-footer">
@@ -70,16 +76,25 @@
     <script>
         // デバッグメッセージ表示用
         function debugLog(message) {
-            const debugOutput = document.getElementById('debugOutput');
-            if (debugOutput) {
-                const logEntry = document.createElement('div');
-                logEntry.className = 'debug-entry';
-                logEntry.textContent = `[${new Date().toLocaleTimeString()}] ${message}`;
-                debugOutput.appendChild(logEntry);
-                debugOutput.scrollTop = debugOutput.scrollHeight;
+            const debugOutput = document.getElementById('debugOutput') || document.createElement('div');
+            if (!document.getElementById('debugOutput')) {
+                debugOutput.id = 'debugOutput';
+                debugOutput.className = 'debug-output';
+                const container = document.querySelector('.post-main .container');
+                if (container) {
+                    container.appendChild(debugOutput);
+                }
             }
+            
+            const logEntry = document.createElement('div');
+            logEntry.className = 'debug-entry';
+            logEntry.textContent = `[${new Date().toLocaleTimeString()}] ${message}`;
+            debugOutput.appendChild(logEntry);
+            debugOutput.scrollTop = debugOutput.scrollHeight;
         }
+    </script>
 
+    <script>
         // URLパラメータからスラグを取得
         const urlParams = new URLSearchParams(window.location.search);
         const slug = urlParams.get('slug');
@@ -92,9 +107,7 @@
             throw new Error('スラグが指定されていません');
         }
         debugLog(`スラグ取得完了: ${slug}`);
-    </script>
 
-    <script>
         // Firebase初期化
         const firebaseConfig = {
             apiKey: "AIzaSyACaRzcxYiSnko-L0cemRaT_SYRHjOi8tY",
@@ -159,6 +172,58 @@
                         debugLog(`サムネイル表示完了: ${post.thumbnail}`);
                     }
                 }
+                
+                // 新着記事を表示
+                const recentPosts = posts
+                    .filter(p => p.slug !== slug)
+                    .sort((a, b) => new Date(b.date) - new Date(a.date))
+                    .slice(0, 5); // 最新の5件だけ表示
+                
+                const recentPostsContainer = document.getElementById('recent-posts');
+                if (!recentPostsContainer) {
+                    debugLog('エラー: recent-posts要素が見つかりません');
+                    return;
+                }
+                
+                recentPostsContainer.innerHTML = '';
+                
+                if (recentPosts.length === 0) {
+                    debugLog('関連記事がありません');
+                    recentPostsContainer.innerHTML = '<p>関連記事がありません</p>';
+                    return;
+                }
+                
+                // 新着記事をカード形式で表示
+                recentPosts.forEach(post => {
+                    const card = document.createElement('div');
+                    card.className = 'post-card';
+                    
+                    // サムネイル部分を構築
+                    const thumbnailHTML = post.thumbnail ? 
+                        `<div class="post-thumbnail" style="background-image: url('${post.thumbnail}')"></div>` : 
+                        `<div class="post-thumbnail default-thumbnail"></div>`;
+                    
+                    // カードの内容を構築
+                    card.innerHTML = `
+                        ${thumbnailHTML}
+                        <div class="post-card-content">
+                            <h2 class="post-title">${post.title}</h2>
+                        </div>
+                    `;
+                    
+                    // クリックイベント追加
+                    card.addEventListener('click', () => {
+                        window.location.href = `post.html?slug=${post.slug}`;
+                    });
+                    
+                    card.style.cursor = 'pointer';
+                    card.style.width = '100%';
+                    card.style.maxWidth = '100%';
+                    card.style.margin = '1rem auto';
+                    
+                    recentPostsContainer.appendChild(card);
+                    debugLog(`新着記事表示完了: ${post.slug}`);
+                });
             })
             .catch(error => {
                 debugLog(`エラー発生: ${error}`);
@@ -195,9 +260,10 @@
             const text = document.getElementById('commentInput').value;
             const author = document.getElementById('commentAuthor').value;
             
+            debugLog('コメント送信ボタンクリック');
             if (!text.trim()) {
-                debugLog('エラー: コメントが空です');
                 alert('コメントを入力してください');
+                debugLog('エラー: コメントが空です');
                 return;
             }
             
@@ -293,10 +359,5 @@
             }
         });
     </script>
-
-    <div class="container debug-container">
-        <h3>デバッグ情報</h3>
-        <div id="debugOutput" class="debug-output"></div>
-    </div>
 </body>
 </html>
