@@ -1,0 +1,56 @@
+/* 管理画面 */
+.admin-container {
+    max-width: 800px;
+    margin: 2rem auto;
+    padding: 2rem;
+    background: var(--card-background);
+    border-radius: var(--border-radius);
+    box-shadow: var(--box-shadow);
+}
+
+.admin-container h1 {
+    margin-bottom: 1.5rem;
+    text-align: center;
+    color: var(--primary-color);
+}
+
+/* フォーム要素 */
+input, 
+textarea {
+    width: 100%;
+    padding: 1rem;
+    margin: 0.5rem 0 1rem;
+    border: 1px solid #ddd;
+    border-radius: var(--border-radius);
+    font-size: 1rem;
+    font-family: inherit;
+    transition: border-color var(--transition-speed);
+}
+
+input:focus, 
+textarea:focus {
+    border-color: var(--primary-color);
+    outline: none;
+}
+
+button {
+    padding: 0.8rem 2rem;
+    background: var(--primary-color);
+    color: white;
+    border: none;
+    border-radius: var(--border-radius);
+    cursor: pointer;
+    font-size: 1rem;
+    font-weight: bold;
+    transition: background var(--transition-speed);
+}
+
+button:hover {
+    background: #357abd;
+}
+
+textarea {
+    height: 300px;
+    resize: vertical;
+    font-family: monospace;
+}
