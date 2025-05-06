@@ -702,25 +702,21 @@ textarea {
 }
 
 .recent-posts-grid {
-    display: flex;
-    flex-direction: column;
+    display: grid;
     gap: 1rem;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); /* 自動調整 */
+    justify-items: center;
     margin-top: 1rem;
 }
 
 .recent-post-card {
     background: var(--card-background);
-    border-radius: var(--border-radius);
-    box-shadow: var(--box-shadow);
-    cursor: pointer;
-    transition: transform var(--transition-speed);
+    border-radius: var(--border-radius); /* 角丸を追加 */
+    box-shadow: var(--box-shadow); /* シャドウを追加 */
     overflow: hidden;
-    display: flex;
-    flex-direction: row;
-    align-items: center;
-    gap: 1rem;
-    border: 1px solid #eee;
-    padding: 0.5rem;
+    width: 100%;
+    max-width: 100%;
+    margin: 0.75rem auto;
 }
 
 .recent-post-card:hover {
@@ -765,12 +761,14 @@ textarea {
 /* レスポンシブ対応 */
 @media (min-width: 960px) {
     .main-container {
+        display: grid; /* block → gridに変更 */
         grid-template-columns: 3.5fr 0.9fr; /* 幅調整を維持 */
-        display: block; /* モバイルでは縦に表示 */
     }
     
     .recent-posts-grid {
-        grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); /* 2列表示 */
+        display: grid;
+        grid-template-columns: repeat(2, 1fr); /* 2列固定表示 */
+        gap: 1.5rem; /* カード間隔を統一 */
     }
 }
 
@@ -778,7 +776,7 @@ textarea {
 .main-container {
     display: grid;
     grid-template-columns: 3.5fr 0.9fr; /* 記事:サイドバー = 3.5:0.9 */
-    gap: 1.5rem; /* カード間隔を狭く */
+    gap: 1.5rem; /* カード間隔 */
     margin: 1rem auto;
     padding: 0 1.5rem;
 }
