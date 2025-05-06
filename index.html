@@ -5,6 +5,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Test Blog - トップページ</title>
     <link rel="stylesheet" href="style.css">
+    
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-database-compat.js"></script>
 </head>
 <body>
     <!-- 固定ナビゲーションバー -->
@@ -25,10 +29,11 @@
     <main class="main-content">
         <div class="container">
             <h2 class="page-title">新着記事</h2>
-            <div id="posts-container" class="posts-grid"></div>
-            <!-- 人気記事セクション -->
+            <div id="recent-posts" class="posts-grid"></div>
+            
             <h2 class="page-title">人気記事</h2>
             <div id="popular-posts" class="posts-grid"></div>
+            
             <div id="loading" class="loading-message">記事を読み込んでいます...</div>
             <div id="error-message" class="error-message hidden"></div>
         </div>
@@ -41,6 +46,27 @@
     </footer>
 
     <script>
+        // Firebase初期化
+        const firebaseConfig = {
+            apiKey: "AIzaSyACaRzcxYiSnko-L0cemRaT_SYRHjOi8tY",
+            authDomain: "online-chat-5daf8.firebaseapp.com",
+            databaseURL: "https://online-chat-5daf8-default-rtdb.firebaseio.com",
+            projectId: "online-chat-5daf8",
+            storageBucket: "online-chat-5daf8.firebasestorage.app",
+            messagingSenderId: "499641724634",
+            appId: "1:499641724634:web:6da05eb79bea5893aaffe3",
+            measurementId: "G-6B5T0TDER9"
+        };
+
+        // Firebase初期化
+        firebase.initializeApp(firebaseConfig);
+        const database = firebase.database();
+    </script>
+
+    <script>
+        // 初期表示状態
+        document.getElementById('loading').textContent = '記事を読み込んでいます...';
+        
         // 記事一覧をGitHubから取得して表示
         fetch('https://raw.githubusercontent.com/riku-tatuto/test-blog/main/posts.json')
             .then(response => {
@@ -50,7 +76,7 @@
                 return response.json();
             })
             .then(posts => {
-                const container = document.getElementById('posts-container');
+                const container = document.getElementById('recent-posts');
                 const loading = document.getElementById('loading');
                 const errorMessage = document.getElementById('error-message');
                 
@@ -65,37 +91,69 @@
                 }
 
                 // 投稿日時の新しい順にソート
-                posts.sort((a, b) => new Date(b.date) - new Date(a.date))
-                    .forEach(post => {
-                        const card = document.createElement('div');
-                        card.className = 'post-card';
-                        
-                        // サムネイル部分を構築
-                        const thumbnailHTML = post.thumbnail ? 
-                            `<div class="post-thumbnail" style="background-image: url('${post.thumbnail}')"></div>` : 
-                            `<div class="post-thumbnail default-thumbnail"></div>`;
-                        
-                        // カードの内容を構築
-                        card.innerHTML = `
-                            ${thumbnailHTML}
-                            <div class="post-card-content">
-                                <h2 class="post-title">${post.title}</h2>
-                            </div>
-                        `;
-                        
-                        // クリックイベント追加
-                        card.addEventListener('click', () => {
-                            window.location.href = `post.html?slug=${post.slug}`;
-                        });
-                        
-                        card.style.cursor = 'pointer';
-                        
-                        container.appendChild(card);
+                const sortedPosts = [...posts].sort((a, b) => new Date(b.date) - new Date(a.date));
+                
+                // 人気記事（いいねが多い順）
+                const popularPosts = [...posts].sort((a, b) => {
+                    const aLikes = a.likes || 0;
+                    const bLikes = b.likes || 0;
+                    return bLikes - aLikes;
+                }).slice(0, 6);
+                
+                // 新着記事（日付新しい順）
+                const recentPosts = sortedPosts.slice(0, 6);
+
+                // 記事カードを作成する関数
+                function createPostCard(post) {
+                    const card = document.createElement('div');
+                    card.className = 'post-card';
+                    
+                    // サムネイル部分を構築
+                    const thumbnailHTML = post.thumbnail ? 
+                        `<div class="post-thumbnail" style="background-image: url('${post.thumbnail}')"></div>` : 
+                        `<div class="post-thumbnail default-thumbnail"></div>`;
+                    
+                    // カードの内容を構築
+                    card.innerHTML = `
+                        ${thumbnailHTML}
+                        <div class="post-card-content">
+                            <h2 class="post-title">${post.title}</h2>
+                        </div>
+                    `;
+                    
+                    // クリックイベント追加
+                    card.addEventListener('click', () => {
+                        window.location.href = `post.html?slug=${post.slug}`;
                     });
+                    
+                    card.style.cursor = 'pointer';
+                    
+                    return card;
+                }
+
+                // 新着記事を表示
+                const recentContainer = document.getElementById('recent-posts');
+                if (recentContainer) {
+                    recentContainer.innerHTML = '';
+                    recentPosts.forEach(post => {
+                        const card = createPostCard(post);
+                        recentContainer.appendChild(card);
+                    });
+                }
+                
+                // 人気記事を表示
+                const popularContainer = document.getElementById('popular-posts');
+                if (popularContainer) {
+                    popularContainer.innerHTML = '';
+                    popularPosts.forEach(post => {
+                        const card = createPostCard(post);
+                        popularContainer.appendChild(card);
+                    });
+                }
             })
             .catch(error => {
                 console.error('エラー:', error);
-                const container = document.getElementById('posts-container');
+                const container = document.getElementById('recent-posts');
                 const loading = document.getElementById('loading');
                 const errorMessage = document.getElementById('error-message');
                 
