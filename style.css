@@ -702,9 +702,10 @@ textarea {
 }
 
 .recent-posts-grid {
-    display: grid;
-    grid-template-columns: repeat(2, 1fr); /* 2列固定表示 */
-    gap: 1rem; /* カード間の間隔 */
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    margin-top: 1rem;
 }
 
 .recent-post-card {
@@ -720,8 +721,6 @@ textarea {
     gap: 1rem;
     border: 1px solid #eee;
     padding: 0.5rem;
-    width: 100%
-    margin: 0; /* 自動マージンを削除 */
 }
 
 .recent-post-card:hover {
@@ -771,11 +770,7 @@ textarea {
     }
     
     .recent-posts-grid {
-        grid-template-columns: 1fr; /* モバイル時は1列に */
-    }
-    
-    .sidebar {
-        margin-top: 2rem;
+        grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); /* 2列表示 */
     }
 }
 
@@ -787,3 +782,4 @@ textarea {
     margin: 1rem auto;
     padding: 0 1.5rem;
 }
+
