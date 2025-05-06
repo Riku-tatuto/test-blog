@@ -27,33 +27,48 @@
         </div>
     </div>
 
-    <!-- 記事コンテナ -->
+    <!-- 記事とサイドバーのコンテナ -->
     <main class="post-main">
-        <div class="post-container-full">
-            <div id="post-header" class="post-header">
-                <div id="post-thumbnail" class="post-thumbnail"></div>
-                <h1 id="post-title">読み込み中...</h1>
-                <div id="post-meta" class="post-meta">
-                    <span id="post-date">日付を読み込み中...</span>
+        <div class="container main-container">
+            <!-- 記事コンテンツ -->
+            <div class="post-section">
+                <div class="post-container-full">
+                    <div id="post-header" class="post-header">
+                        <div class="thumbnail-container">
+                            <div id="post-thumbnail" class="post-thumbnail"></div>
+                        </div>
+                        <h1 id="post-title">読み込み中...</h1>
+                        <div id="post-meta" class="post-meta">
+                            <span id="post-date">日付を読み込み中...</span>
+                        </div>
+                    </div>
+                    
+                    <div id="post-content" class="post-content">
+                        <!-- 記事が表示される -->
+                    </div>
+                    
+                    <div class="interaction">
+                        <button id="likeBtn" class="like-button">👍 いいね</button>
+                        <span id="likeCount" class="like-count">0</span>
+                        
+                        <div class="comments">
+                            <h3>コメント</h3>
+                            <div class="comment-form">
+                                <input type="text" id="commentAuthor" placeholder="名前" required>
+                                <textarea id="commentInput" placeholder="コメントを入力..."></textarea>
+                                <button id="commentBtn" class="comment-button">送信</button>
+                            </div>
+                            <div id="commentList" class="comment-list"></div>
+                        </div>
+                    </div>
                 </div>
             </div>
             
-            <div id="post-content" class="post-content">
-                <!-- 記事が表示される -->
-            </div>
-            
-            <div class="interaction">
-                <button id="likeBtn" class="like-button">👍 いいね</button>
-                <span id="likeCount" class="like-count">0</span>
-                
-                <div class="comments">
-                    <h3>コメント</h3>
-                    <div class="comment-form">
-                        <input type="text" id="commentAuthor" placeholder="名前" required>
-                        <textarea id="commentInput" placeholder="コメントを入力..."></textarea>
-                        <button id="commentBtn" class="comment-button">送信</button>
-                    </div>
-                    <div id="commentList" class="comment-list"></div>
+            <!-- 新着記事セクション -->
+            <div class="sidebar">
+                <div class="sidebar-section">
+                    <h2>新着記事</h2>
+                    <div id="recent-posts" class="recent-posts-grid"></div>
                 </div>
             </div>
         </div>
@@ -131,6 +146,49 @@
                         postThumbnail.style.backgroundPosition = 'center';
                     }
                 }
+                
+                // 新着記事を表示
+                const recentPosts = posts
+                    .filter(p => p.slug !== slug)
+                    .sort((a, b) => new Date(b.date) - new Date(a.date))
+                    .slice(0, 5); // 最新の5件だけ表示
+                
+                const recentPostsContainer = document.getElementById('recent-posts');
+                if (!recentPostsContainer) return;
+                
+                recentPostsContainer.innerHTML = '';
+                
+                if (recentPosts.length === 0) {
+                    recentPostsContainer.innerHTML = '<p>関連記事がありません</p>';
+                    return;
+                }
+                
+                recentPosts.forEach(post => {
+                    const card = document.createElement('div');
+                    card.className = 'recent-post-card';
+                    
+                    // サムネイル部分を構築
+                    const thumbnailHTML = post.thumbnail ? 
+                        `<div class="recent-thumbnail" style="background-image: url('${post.thumbnail}')"></div>` : 
+                        `<div class="recent-thumbnail default-thumbnail"></div>`;
+                    
+                    // カードの内容を構築
+                    card.innerHTML = `
+                        ${thumbnailHTML}
+                        <div class="recent-card-content">
+                            <h3 class="recent-post-title">${post.title}</h3>
+                        </div>
+                    `;
+                    
+                    // クリックイベント追加
+                    card.addEventListener('click', () => {
+                        window.location.href = `post.html?slug=${post.slug}`;
+                    });
+                    
+                    card.style.cursor = 'pointer';
+                    
+                    recentPostsContainer.appendChild(card);
+                });
             })
             .catch(error => {
                 console.error('エラー:', error);
