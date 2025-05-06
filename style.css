@@ -952,3 +952,53 @@ textarea {
     vertical-align: middle;
     margin-right: 0.5rem;
 }
+
+/* タブメニュー */
+.sidebar-tabs {
+    display: flex;
+    justify-content: center;
+    gap: 1rem;
+    margin-bottom: 1rem;
+    border-bottom: 2px solid #eee;
+}
+
+.tab-button {
+    background: transparent;
+    border: none;
+    padding: 0.75rem 0;
+    font-size: 1rem;
+    color: var(--text-color);
+    cursor: pointer;
+    transition: all var(--transition-speed);
+    position: relative;
+    text-align: center;
+    min-width: 80px;
+}
+
+.tab-button.active {
+    color: var(--primary-color);
+}
+
+.tab-button.active::after {
+    content: "";
+    position: absolute;
+    bottom: -2px;
+    left: 0;
+    width: 100%;
+    height: 3px;
+    background-color: var(--primary-color);
+}
+
+/* モバイル用の調整 */
+@media (max-width: 768px) {
+    .sidebar-tabs {
+        flex-wrap: wrap;
+        justify-content: center;
+    }
+    
+    .tab-button {
+        flex-basis: 48%;
+        font-size: 0.9rem;
+        min-width: 0;
+    }
+}
