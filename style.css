@@ -993,3 +993,133 @@ textarea {
 .hidden {
     display: none !important;
 }
+
+/* サイドバー内のタブメニュー */
+.sidebar-tabs {
+    display: flex;
+    justify-content: center;
+    gap: 1rem;
+    margin-bottom: 1rem;
+    padding: 0 1.5rem;
+}
+
+/* タブボタン共通スタイル */
+.tab-button {
+    background: transparent;
+    border: none;
+    padding: 0.5rem 1rem;
+    font-size: 1rem;
+    color: var(--text-color);
+    cursor: pointer;
+    transition: all var(--transition-speed);
+    position: relative;
+    z-index: 1;
+}
+
+/* アクティブなタブ */
+.tab-button.active {
+    color: var(--primary-color);
+    font-weight: bold;
+}
+
+/* アクティブタブの下線 */
+.tab-button.active::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    height: 3px;
+    background-color: var(--primary-color);
+    z-index: -1;
+}
+
+/* タブホバー時のスタイル */
+.tab-button:hover {
+    color: var(--primary-color);
+}
+
+/* タブコンテンツ共通スタイル */
+.tab-content {
+    display: grid;
+    gap: 1.5rem;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    padding: 0 1.5rem;
+    margin-top: 1rem;
+}
+
+/* 非表示用クラス */
+.hidden {
+    display: none !important;
+}
+
+/* 960px以上のデスクトップ用スタイル */
+@media (min-width: 960px) {
+    /* 1. 記事ページの本文とサイドバーの比率調整 */
+    .post-main .main-container {
+        grid-template-columns: 2.5fr 1.5fr; /* 本文62.5%：新着記事37.5% */
+    }
+
+    /* 2. サイドバーを非sticky化 */
+    .post-main .sidebar {
+        position: static !important;
+        top: auto !important;
+    }
+
+    /* 3. 新着記事リストを最大2列に */
+    .post-main #recent-posts,
+    .post-main #popular-posts {
+        display: grid !important;
+        grid-template-columns: repeat(2, 1fr) !important;
+        gap: 1rem !important;
+    }
+
+    /* 4. 記事カード全体（403:340 アスペクト比） */
+    .post-main #recent-posts .post-card,
+    .post-main #popular-posts .post-card {
+        aspect-ratio: 403 / 340 !important;
+        height: auto !important;
+        display: flex;
+        flex-direction: column;
+        overflow: hidden;
+    }
+
+    /* 5. サムネイル部分だけ（355:226 アスペクト比） */
+    .post-main #recent-posts .post-card .post-thumbnail,
+    .post-main #popular-posts .post-card .post-thumbnail {
+        aspect-ratio: 355 / 226 !important;
+        width: 100% !important;
+        height: auto !important;
+        background-size: cover !important;
+        background-position: center !important;
+        border-radius: var(--border-radius) !important;
+    }
+
+    /* 6. タイトル領域の上詰め＆余白調整 */
+    .post-main #recent-posts .post-card .post-card-content,
+    .post-main #popular-posts .post-card .post-card-content {
+        flex: 1;
+        padding-top: 0.25rem !important;
+        padding-bottom: 0.5rem !important;
+        padding-left: 0.5rem !important;
+        padding-right: 0.5rem !important;
+        display: flex;
+        flex-direction: column;
+        justify-content: flex-start;
+    }
+
+    /* 7. カード内タイトルのフォントサイズ＆行数制限 */
+    .post-main #recent-posts .post-card .post-card-content h2.post-title,
+    .post-main #popular-posts .post-card .post-card-content h2.post-title {
+        font-size: 0.875rem !important;     /* 小さめフォント */
+        line-height: 1.1em !important;      /* 行間調整 */
+        -webkit-line-clamp: 2 !important;   /* 最大2行 */
+        display: -webkit-box !important;
+        -webkit-box-orient: vertical !important;
+        overflow: hidden !important;
+        text-overflow: ellipsis !important;
+        margin-top: 0 !important;
+        margin-bottom: 0.25rem !important;
+        width: 100%;
+    }
+}
