@@ -1,10 +1,5 @@
-/* モバイル用の基本スタイル */
+/* レスポンシブデザイン */
 @media (max-width: 768px) {
-    /* コンテナの余白調整 */
-    .container {
-        padding: 0 1rem;
-    }
-    
     .post-card {
         padding: 1rem;
     }
@@ -45,28 +40,46 @@
     }
     
     .recent-thumbnail {
-        width: 100px;
+        width: 100%;
         height: 56px; /* 100x56 = 16:9 アスペクト比 */
     }
 }
 
-/* タブレット・PC用の調整 */
-@media (min-width: 769px) {
-    .post-main {
-        padding-left: 2rem;
-        padding-right: 2rem;
-    }
-}
-
-/* サイドバー用のレスポンシブ */
 @media (max-width: 960px) {
+    .navbar .container {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 1rem;
+    }
+    
+    .nav-links {
+        width: 100%;
+        justify-content: space-between;
+    }
+    
+    .post-container-full {
+        padding: 1.5rem;
+    }
+    
+    .post-header h1 {
+        font-size: 1.75rem;
+    }
+    
+    .comment-actions {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+    
+    .like-comment-btn {
+        width: 100%;
+        text-align: center;
+    }
+    
     .main-container {
         display: block;
     }
     
     .sidebar {
-        border-left: none;
-        padding-left: 0;
         margin-top: 2rem;
     }
     
@@ -74,10 +87,5 @@
         display: grid;
         grid-template-columns: 1fr;
         gap: 1rem;
-    }
-    
-    .recent-thumbnail {
-        width: 100%;
-        height: 56px; /* 100x56 = 16:9 アスペクト比 */
     }
 }
