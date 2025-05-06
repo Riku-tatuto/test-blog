@@ -562,8 +562,13 @@ textarea {
     cursor: pointer;
     transition: transform var(--transition-speed);
     overflow: hidden;
-    max-width: 850px;
-    margin: 1.5rem auto;
+    width: 403px;
+    height: 340px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    margin: 1rem;
+    position: relative;
 }
 
 .post-card:hover {
@@ -571,29 +576,42 @@ textarea {
 }
 
 .post-card .post-thumbnail {
-    width: 850px;
-    height: 478px;
+    width: 100%;
+    height: 226px;
     background-size: cover;
     background-position: center;
     border-top-left-radius: var(--border-radius);
     border-top-right-radius: var(--border-radius);
+    flex-shrink: 0;
 }
 
 .post-card .post-card-content {
     padding: 1rem;
-    text-align: center;
+    flex-grow: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    height: 114px;
+    overflow: hidden;
 }
 
 .post-card h2 {
     font-size: 1.25rem;
     margin-bottom: 0.5rem;
+    word-wrap: break-word;
+    overflow: hidden;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    white-space: normal;
+    height: 56px;
 }
 
 .posts-grid {
     display: grid;
     gap: 1.5rem;
     margin-top: 1rem;
-    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    grid-template-columns: repeat(auto-fill, minmax(403px, 1fr));
     justify-items: center;
 }
 
