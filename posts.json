@@ -26,5 +26,11 @@
     "title": "テスト記事6",
     "date": "2025-05-06T01:07:06.059Z",
     "thumbnail": "https://photo-chips.com/user_data/00014783_bb3bdd.jpg"
+  },
+  {
+    "slug": "test7",
+    "title": "テスト記事7",
+    "date": "2025-05-06T01:55:20.030Z",
+    "thumbnail": "https://photo-chips.com/user_data/00014783_bb3bdd.jpg"
   }
 ]
