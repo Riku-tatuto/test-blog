@@ -145,7 +145,6 @@ a:hover {
 .post-container-full {
     max-width: 100%;
     width: 100%;
-    margin: 1rem auto;
     padding: 2rem;
     background: var(--card-background);
     border-radius: var(--border-radius);
@@ -155,7 +154,6 @@ a:hover {
 @media (min-width: 1200px) {
     .post-container-full {
         max-width: 1200px;
-        margin: 1rem auto;
         padding: 2rem;
     }
 }
