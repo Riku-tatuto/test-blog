@@ -4,11 +4,12 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Test Blog - トップページ</title>
-    <link rel="stylesheet" href="style.css">
-    
-    <!-- Firebase SDK -->
-    <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-database-compat.js"></script>
+    <link rel="stylesheet" href="base.css">
+    <link rel="stylesheet" href="navbar.css">
+    <link rel="stylesheet" href="content.css">
+    <link rel="stylesheet" href="post.css">
+    <link rel="stylesheet" href="sidebar.css">
+    <link rel="stylesheet" href="responsive.css">
 </head>
 <body>
     <!-- 固定ナビゲーションバー -->
@@ -42,9 +43,6 @@
     </footer>
 
     <script>
-        // 初期表示状態
-        document.getElementById('loading').textContent = '記事を読み込んでいます...';
-        
         // 記事一覧をGitHubから取得して表示
         fetch('https://raw.githubusercontent.com/riku-tatuto/test-blog/main/posts.json')
             .then(response => {
