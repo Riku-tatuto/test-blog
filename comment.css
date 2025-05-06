@@ -1,10 +1,22 @@
-/* コメントスタイル */
-.comments {
-    margin-top: 1.5rem;
+/* いいねボタン */
+.like-button {
+    background: var(--secondary-color);
+    margin-right: 1rem;
+    padding: 0.8rem 2rem;
+    font-weight: bold;
+    border: none;
+    border-radius: var(--border-radius);
+    cursor: pointer;
+    color: white;
 }
 
-.comments h3 {
-    margin-bottom: 0.5rem;
+.like-button:hover {
+    background: #e53935;
+}
+
+/* コメントセクション */
+.comments {
+    margin-top: 1.5rem;
 }
 
 .comment-form {
@@ -25,13 +37,6 @@
     font-family: inherit;
     resize: vertical;
     min-height: 60px;
-    padding: 1rem;
-    border: 1px solid #ddd;
-    border-radius: var(--border-radius);
-    margin: 0.5rem 0 1rem;
-    font-size: 1rem;
-    font-family: inherit;
-    transition: border-color var(--transition-speed);
 }
 
 .comment-form button {
@@ -44,9 +49,6 @@
     border: none;
     border-radius: var(--border-radius);
     cursor: pointer;
-    font-size: 1rem;
-    font-weight: bold;
-    transition: background var(--transition-speed);
 }
 
 .comment-form button:hover {
@@ -64,6 +66,8 @@
     margin: 0.5rem 0;
     border: 1px solid #ddd;
     transition: all var(--transition-speed);
+    visibility: visible;
+    opacity: 1;
 }
 
 .comment-header {
@@ -92,7 +96,7 @@
     margin-top: 0.5rem;
 }
 
-.comment-footer .comment-actions {
+.comment-actions {
     display: flex;
     align-items: center;
     gap: 0.5rem;
