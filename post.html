@@ -22,7 +22,7 @@
     <!-- パンくずリスト -->
     <div class="container breadcrumb-container">
         <div class="breadcrumb">
-            <a href="index.html" class="breadcrumb-link">ホーム</a> > 
+            <a href="index.html">ホーム</a> > 
             <span id="breadcrumb-title">記事読み込み中...</span>
         </div>
     </div>
@@ -76,12 +76,12 @@
                     <!-- タブコンテンツ -->
                     <div id="tab-content-container">
                         <!-- 新着記事 -->
-                        <div id="recent-posts" class="tab-content">
+                        <div id="recent-posts" class="posts-grid tab-content">
                             <p class="loading-message">新着記事を読み込んでいます...</p>
                         </div>
                         
                         <!-- 人気記事 -->
-                        <div id="popular-posts" class="tab-content hidden">
+                        <div id="popular-posts" class="posts-grid tab-content hidden">
                             <p class="loading-message">人気記事を読み込んでいます...</p>
                         </div>
                     </div>
@@ -163,7 +163,7 @@
                     }
                 }
                 
-                // 全ての関連記事を表示
+                // 関連する記事を表示
                 const allPosts = posts.filter(p => p.slug !== slug);
                 
                 // 新着記事（日付順）
@@ -171,7 +171,7 @@
                     .sort((a, b) => new Date(b.date) - new Date(a.date))
                     .slice(0, 6); // 最新の6件だけ表示
                 
-                // 人気記事（いいね数順）
+                // 人気記事（いいねが多い順）
                 const popularPosts = [...allPosts]
                     .sort((a, b) => {
                         const aLikes = a.likes || 0;
@@ -205,7 +205,7 @@
                     
                     card.style.cursor = 'pointer';
                     card.style.width = '100%';
-                    card.style.max-width = '100%';
+                    card.style.maxWidth = '100%';
                     card.style.margin = '1rem auto';
                     
                     return card;
@@ -356,16 +356,27 @@
 
     <script>
         // タブ切り替え機能
-        document.querySelectorAll('.tab-button').forEach(button => {
-            button.addEventListener('click', () => {
-                // 現在のアクティブ状態を解除
-                document.querySelector('.tab-button.active').classList.remove('active');
-                button.classList.add('active');
-                
-                // 対応するコンテンツを表示/非表示
-                const target = button.id.replace('-tab', '-posts');
-                document.querySelectorAll('.tab-content').forEach(grid => {
-                    grid.classList.toggle('hidden', grid.id !== target);
+        document.addEventListener('DOMContentLoaded', function() {
+            const tabButtons = document.querySelectorAll('.tab-button');
+            const tabContents = document.querySelectorAll('.tab-content');
+            
+            tabButtons.forEach(button => {
+                button.addEventListener('click', () => {
+                    // 現在のアクティブ状態を解除
+                    document.querySelector('.tab-button.active')?.classList.remove('active');
+                    
+                    // 新しいアクティブ状態を設定
+                    button.classList.add('active');
+                    
+                    // 対応するコンテンツを表示/非表示
+                    const target = button.id.replace('-tab', '-posts');
+                    tabContents.forEach(content => {
+                        if (content.id === target) {
+                            content.classList.remove('hidden');
+                        } else {
+                            content.classList.add('hidden');
+                        }
+                    });
                 });
             });
         });
