@@ -929,34 +929,50 @@ textarea {
     justify-content: center;
     gap: 1rem;
     margin-bottom: 1rem;
-    border-bottom: 2px solid #eee;
+    padding: 0 1.5rem;
 }
 
 .tab-button {
     background: transparent;
     border: none;
-    padding: 0.75rem 0;
+    padding: 0.5rem 1rem;
     font-size: 1rem;
     color: var(--text-color);
     cursor: pointer;
     transition: all var(--transition-speed);
     position: relative;
-    text-align: center;
-    min-width: 80px;
+    z-index: 1;
 }
 
+/* アクティブなタブ */
 .tab-button.active {
     color: var(--primary-color);
+    font-weight: bold;
 }
 
+.tab-button:hover {
+    color: var(--primary-color);
+    text-decoration: underline;
+}
+
+.tab-content {
+    display: grid;
+    gap: 1.5rem;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    padding: 0 1.5rem;
+    margin-top: 1rem;
+}
+
+/* タブの下線 */
 .tab-button.active::after {
-    content: "";
+    content: '';
     position: absolute;
-    bottom: -2px;
+    bottom: 0;
     left: 0;
     width: 100%;
     height: 3px;
     background-color: var(--primary-color);
+    z-index: -1;
 }
 
 /* モバイル用の調整 */
@@ -971,4 +987,9 @@ textarea {
         font-size: 0.9rem;
         min-width: 0;
     }
+}
+
+/* 非表示用クラス */
+.hidden {
+    display: none !important;
 }
